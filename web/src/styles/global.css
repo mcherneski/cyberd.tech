@@ -139,7 +139,12 @@ a:focus-visible {
   object-fit: cover;
   transition:
     border-color var(--dur) var(--ease),
-    box-shadow var(--dur) var(--ease);
+    box-shadow var(--dur) var(--ease),
+    filter var(--dur) var(--ease);
+}
+
+html:not([data-theme="dark"]) .wordmark__logo {
+  filter: brightness(0);
 }
 
 .wordmark:hover .wordmark__logo,
