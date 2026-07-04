@@ -1,0 +1,23 @@
+version: 2
+updates:
+  # Keeps SHA-pinned actions in deploy.yml current (updates the SHA + version comment).
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns:
+          - "*"
+
+  # Single root lockfile covers the web and infra npm workspaces.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch

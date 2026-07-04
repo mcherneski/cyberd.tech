@@ -1,3 +1,5 @@
+import { getTurnstileSecret, turnstileSecretConfigured } from "./turnstile-secret.js";
+
 type SocialPayload = {
   token?: string;
   trap?: string;
@@ -5,7 +7,6 @@ type SocialPayload = {
 
 const allowedOrigin = process.env.ALLOWED_ORIGIN ?? "*";
 const turnstileSiteverifyUrl = process.env.TURNSTILE_SITEVERIFY_URL ?? "";
-const turnstileSecret = process.env.TURNSTILE_SECRET_KEY ?? "";
 const linkedinUrl = process.env.SOCIAL_LINKEDIN_URL ?? "";
 const xUrl = process.env.SOCIAL_X_URL ?? "";
 const telegramUrl = process.env.SOCIAL_TELEGRAM_URL ?? "";
@@ -47,8 +48,11 @@ async function verifyViaWorker(token: string, remoteIp?: string): Promise<boolea
 }
 
 async function verifyViaSecret(token: string, remoteIp?: string): Promise<boolean> {
+  const secret = await getTurnstileSecret();
+  if (!secret) return false;
+
   const form = new URLSearchParams();
-  form.set("secret", turnstileSecret);
+  form.set("secret", secret);
   form.set("response", token);
   if (remoteIp) form.set("remoteip", remoteIp);
 
@@ -68,7 +72,7 @@ async function verifyTurnstile(token: string, remoteIp?: string): Promise<boolea
   if (turnstileSiteverifyUrl) {
     return verifyViaWorker(token, remoteIp);
   }
-  if (turnstileSecret) {
+  if (turnstileSecretConfigured) {
     return verifyViaSecret(token, remoteIp);
   }
   return false;

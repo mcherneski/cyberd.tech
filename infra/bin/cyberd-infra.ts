@@ -11,7 +11,8 @@ const contactToAddress = app.node.tryGetContext("contactToAddress") ?? process.e
 const contactFromAddress = app.node.tryGetContext("contactFromAddress") ?? process.env.CONTACT_FROM_ADDRESS;
 const turnstileSiteverifyUrl =
   app.node.tryGetContext("turnstileSiteverifyUrl") ?? process.env.TURNSTILE_SITEVERIFY_URL;
-const turnstileSecretKey = app.node.tryGetContext("turnstileSecretKey") ?? process.env.TURNSTILE_SECRET_KEY;
+const turnstileSecretParameterName =
+  app.node.tryGetContext("turnstileSecretParameterName") ?? process.env.TURNSTILE_SECRET_PARAMETER;
 const socialLinkedinUrl = app.node.tryGetContext("socialLinkedinUrl") ?? process.env.SOCIAL_LINKEDIN_URL;
 const socialXUrl = app.node.tryGetContext("socialXUrl") ?? process.env.SOCIAL_X_URL;
 const socialTelegramUrl = app.node.tryGetContext("socialTelegramUrl") ?? process.env.SOCIAL_TELEGRAM_URL;
@@ -27,7 +28,7 @@ new PortfolioStack(app, "CyberdPortfolioStack", {
   contactToAddress,
   contactFromAddress,
   turnstileSiteverifyUrl,
-  turnstileSecretKey,
+  turnstileSecretParameterName,
   socialLinkedinUrl,
   socialXUrl,
   socialTelegramUrl,

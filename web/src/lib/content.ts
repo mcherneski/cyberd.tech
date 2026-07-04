@@ -15,12 +15,28 @@ function yearFromLabel(value: string): number {
 }
 
 export function sortCredentialsChronologically(entries: CredentialEntry[]): CredentialEntry[] {
-  return [...entries].sort((a, b) => yearFromLabel(a.data.start) - yearFromLabel(b.data.start));
+  const timelinePriority: Record<string, number> = {
+    moxa: 0,
+    founder: 1,
+    "blockchain-engineering": 2,
+  };
+
+  return [...entries].sort((a, b) => {
+    const yearDiff = yearFromLabel(b.data.start) - yearFromLabel(a.data.start);
+    if (yearDiff !== 0) return yearDiff;
+
+    const priorityA = timelinePriority[a.id] ?? 999;
+    const priorityB = timelinePriority[b.id] ?? 999;
+    return priorityA - priorityB;
+  });
 }
 
 function credentialsForTimeline(entries: CredentialEntry[]): CredentialEntry[] {
   return entries.filter(
-    (entry) => entry.id !== "certifications" && entry.data.type !== "credential",
+    (entry) =>
+      entry.id !== "certifications" &&
+      entry.data.type !== "credential" &&
+      entry.data.type !== "education",
   );
 }
 

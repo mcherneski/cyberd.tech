@@ -25,16 +25,15 @@ jobs:
       CONTACT_TO_ADDRESS: ${{ secrets.CONTACT_TO_ADDRESS }}
       CONTACT_FROM_ADDRESS: ${{ secrets.CONTACT_FROM_ADDRESS }}
       TURNSTILE_SITEVERIFY_URL: ${{ vars.TURNSTILE_SITEVERIFY_URL }}
-      TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
       SOCIAL_LINKEDIN_URL: ${{ vars.SOCIAL_LINKEDIN_URL }}
       SOCIAL_X_URL: ${{ vars.SOCIAL_X_URL }}
       SOCIAL_TELEGRAM_URL: ${{ vars.SOCIAL_TELEGRAM_URL }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "22.12"
           cache: npm
@@ -46,7 +45,7 @@ jobs:
         run: npm run build -w web
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}

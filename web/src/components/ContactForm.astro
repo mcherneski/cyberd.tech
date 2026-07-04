@@ -3,8 +3,7 @@ import SocialLinks from "@components/SocialLinks.astro";
 
 const contactApiUrl = import.meta.env.PUBLIC_CONTACT_API_URL ?? "";
 const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
-const turnstileWorkerUrl = import.meta.env.PUBLIC_TURNSTILE_WORKER_URL ?? "";
-const turnstileRequired = Boolean(contactApiUrl && turnstileSiteKey && turnstileWorkerUrl);
+const turnstileRequired = Boolean(contactApiUrl && turnstileSiteKey);
 ---
 
 <section id="contact" class="container py-12">
@@ -13,7 +12,7 @@ const turnstileRequired = Boolean(contactApiUrl && turnstileSiteKey && turnstile
       <p class="eyebrow accent-crimson">Work with me</p>
       <h2 class="mt-3 text-4xl font-black tracking-[-0.07em]">Let's build something.</h2>
       <p class="text-muted mt-4">
-        Data-readiness assessments, enterprise architecture and AI-modernization planning, and cloud consulting — as a project, retainer, or advisory call. Tell me what you're working on and I'll reply personally.
+        Data-readiness assessments, enterprise architecture and AI-modernization planning, and cloud consulting, as a project, retainer, or advisory call. Tell me what you're working on and I'll reply personally.
       </p>
       <SocialLinks />
     </div>
@@ -23,7 +22,6 @@ const turnstileRequired = Boolean(contactApiUrl && turnstileSiteKey && turnstile
       action={contactApiUrl || "/contact-disabled"}
       data-contact-form
       data-api={contactApiUrl}
-      data-worker={turnstileWorkerUrl}
       data-turnstile-required={turnstileRequired ? "true" : "false"}
     >
       <label class="grid gap-2 font-bold">
@@ -68,7 +66,7 @@ const turnstileRequired = Boolean(contactApiUrl && turnstileSiteKey && turnstile
       {
         contactApiUrl && !turnstileRequired && (
           <p class="text-muted font-mono text-xs">
-            Set PUBLIC_TURNSTILE_SITE_KEY and PUBLIC_TURNSTILE_WORKER_URL to enable bot protection.
+            Set PUBLIC_TURNSTILE_SITE_KEY to enable bot protection.
           </p>
         )
       }
@@ -81,12 +79,7 @@ const turnstileRequired = Boolean(contactApiUrl && turnstileSiteKey && turnstile
 )}
 
 <script>
-  import {
-    hideTurnstileSlot,
-    readTurnstileToken,
-    showTurnstileSlot,
-    verifyTurnstileViaWorker,
-  } from "../lib/turnstile-spin";
+  import { hideTurnstileSlot, readTurnstileToken, showTurnstileSlot } from "../lib/turnstile-spin";
 
   function setContactStatus(form: HTMLFormElement, message: string, visible = true) {
     const status = form.querySelector<HTMLElement>("[data-contact-status]");
@@ -109,23 +102,19 @@ const turnstileRequired = Boolean(contactApiUrl && turnstileSiteKey && turnstile
       }
 
       const turnstileRequired = form.getAttribute("data-turnstile-required") === "true";
-      const workerUrl = form.getAttribute("data-worker") ?? "";
       const submitButton = form.querySelector<HTMLButtonElement>('button[type="submit"]');
 
       if (submitButton) submitButton.disabled = true;
-      setContactStatus(form, turnstileRequired ? "Verifying…" : "Sending…");
+      setContactStatus(form, "Sending…");
 
       try {
+        // Turnstile tokens are single-use: read the token here and let the
+        // contact API verify it server-side exactly once.
+        let token = "";
         if (turnstileRequired) {
-          const token = readTurnstileToken(form);
+          token = readTurnstileToken(form);
           if (!token) {
             setContactStatus(form, "Complete the verification challenge.");
-            return;
-          }
-
-          const verified = await verifyTurnstileViaWorker(token, workerUrl);
-          if (!verified.success) {
-            setContactStatus(form, "Verification failed. Try again.");
             return;
           }
           hideTurnstileSlot(form);
@@ -136,6 +125,7 @@ const turnstileRequired = Boolean(contactApiUrl && turnstileSiteKey && turnstile
           email: (form.elements.namedItem("email") as HTMLInputElement).value,
           message: (form.elements.namedItem("message") as HTMLTextAreaElement).value,
           website: (form.elements.namedItem("website") as HTMLInputElement).value,
+          token,
         };
 
         const response = await fetch(api, {

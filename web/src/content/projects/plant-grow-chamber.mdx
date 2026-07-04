@@ -1,6 +1,6 @@
 ---
 title: "Plant Grow Chamber"
-summary: "A fish tank, an Arduino, and a stack of sensors from Mouser — a sealed micro-greenhouse that holds plants in their optimal conditions, and a small test bed for urban farming ideas."
+summary: "A fish tank, an Arduino, and a stack of sensors from Mouser: a sealed micro-greenhouse that holds plants in their optimal conditions, and a small test bed for urban farming ideas."
 date: "2025-09-01"
 status: "research"
 context: "hobby"
@@ -16,10 +16,10 @@ agentReport: "A personal hardware build by Mike Cherneski: an Arduino-controlled
 
 Plants are a control-systems problem that happens to be alive. That's the whole appeal.
 
-The itch behind this build is bigger than a houseplant: I'm fascinated by the grow process, and I keep circling one question — if you can hold perfect growing conditions in a box on a desk, what does it take to hold them in a shipping container, a rooftop, a basement in a food desert? Urban farming lives or dies on exactly this kind of automation. So I started at the smallest useful scale.
+The itch behind this build is bigger than a houseplant: I'm fascinated by the grow process, and I keep circling one question: if you can hold perfect growing conditions in a box on a desk, what does it take to hold them in a shipping container, a rooftop, a basement in a food desert? Urban farming lives or dies on exactly this kind of automation. So I started at the smallest useful scale.
 
-The chamber itself is a standard fish tank, which turns out to be a great chassis: transparent, sealed enough to hold a climate, cheap, and nobody cries if you drill it. Inside, an Arduino runs the show against a sensor array from Mouser — temperature, humidity, light level, and soil moisture — with grow lights on automated schedules. The 3D printer earns its keep on the unglamorous parts: sensor mounts, light brackets, cable passthroughs, and the little fittings that turn "electronics resting on a tank" into "a machine."
+The chamber itself is a standard fish tank, which turns out to be a great chassis: transparent, sealed enough to hold a climate, cheap, and nobody cries if you drill it. Inside, an Arduino runs the show against a sensor array from Mouser (temperature, humidity, light level, and soil moisture) with grow lights on automated schedules. The 3D printer earns its keep on the unglamorous parts: sensor mounts, light brackets, cable passthroughs, and the little fittings that turn "electronics resting on a tank" into "a machine."
 
-The control loop is the fun part. The Arduino reads the sensors, compares against the target ranges for whatever is growing, and adjusts — lights on schedule, conditions nudged back into band when they drift. The plants don't care how elegant the code is. They are a brutally honest test harness: get the loop wrong and the evidence wilts in front of you.
+The control loop is the fun part. The Arduino reads the sensors, compares against the target ranges for whatever is growing, and adjusts: lights on schedule, conditions nudged back into band when they drift. The plants don't care how elegant the code is. They are a brutally honest test harness: get the loop wrong and the evidence wilts in front of you.
 
-It's still evolving — more crops, better logging, and eventually pushing the sensor data somewhere I can chart a full grow cycle. The full build log (parts list, wiring, code, and what died along the way) is coming as this one matures.
+It's still evolving: more crops, better logging, and eventually pushing the sensor data somewhere I can chart a full grow cycle. The full build log (parts list, wiring, code, and what died along the way) is coming as this one matures.
