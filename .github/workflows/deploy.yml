@@ -55,5 +55,54 @@ jobs:
         working-directory: infra
 
       - name: CDK deploy
-        run: npm run deploy -- --require-approval never
         working-directory: infra
+        shell: bash
+        env:
+          STACK_NAME: CyberdPortfolioStack
+        run: |
+          set -uo pipefail
+
+          # If a previous run left the stack mid-operation, wait it out so this
+          # deploy doesn't collide with an in-progress CloudFormation update.
+          wait_for_stable() {
+            for i in $(seq 1 60); do
+              status=$(aws cloudformation describe-stacks --stack-name "$STACK_NAME" \
+                --query "Stacks[0].StackStatus" --output text 2>/dev/null || echo "MISSING")
+              case "$status" in
+                *_IN_PROGRESS)
+                  echo "Stack is $status; waiting to stabilize ($i/60)..."
+                  sleep 15
+                  ;;
+                *)
+                  echo "Stack status: $status"
+                  return 0
+                  ;;
+              esac
+            done
+            echo "Timed out waiting for stack to stabilize."
+            return 1
+          }
+
+          # "direct" skips change sets, which avoids the intermittent
+          # ChangeSetNotFound race that CDK hits in CI (aws-cdk #13187/#14350).
+          attempt=1
+          max_attempts=3
+          while true; do
+            if ! wait_for_stable; then
+              exit 1
+            fi
+
+            if npm run deploy -- --require-approval never --method direct; then
+              echo "CDK deploy succeeded on attempt ${attempt}."
+              break
+            fi
+
+            if [ "$attempt" -ge "$max_attempts" ]; then
+              echo "CDK deploy failed after ${attempt} attempts."
+              exit 1
+            fi
+
+            echo "CDK deploy attempt ${attempt} failed; retrying in 30s..."
+            attempt=$((attempt + 1))
+            sleep 30
+          done
