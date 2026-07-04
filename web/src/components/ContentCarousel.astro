@@ -9,28 +9,37 @@ interface Props {
 
 const { notebook, papers } = Astro.props;
 const items = [
-  ...notebook.slice(0, 4).map((entry) => ({
+  ...notebook.map((entry) => ({
     title: entry.data.title,
     summary: entry.data.excerpt,
     href: entryPath("notebook", entry.id),
     label: "Notebook",
+    type: "notebook" as const,
   })),
-  ...papers.slice(0, 4).map((entry) => ({
+  ...papers.map((entry) => ({
     title: entry.data.title,
     summary: entry.data.summary,
     href: entryPath("papers", entry.id),
     label: "Paper",
+    type: "paper" as const,
   })),
 ];
 ---
 
-<section class="container py-12">
-  <div class="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-    <div>
-      <p class="eyebrow accent-yellow">Notebook / papers</p>
-      <h2 class="text-4xl font-black tracking-[-0.07em]">Recent thinking.</h2>
+<section class="container py-12" data-content-carousel-filter>
+  <div class="mb-6 flex flex-col gap-4">
+    <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <div>
+        <p class="eyebrow accent-yellow">Notebook / papers</p>
+        <h2 class="text-4xl font-black tracking-[-0.07em]">Recent thinking.</h2>
+      </div>
+      <a class="button button-secondary shrink-0" href="/notebook">Browse Notebook</a>
     </div>
-    <a class="button button-secondary" href="/notebook">Browse Notebook</a>
+    <div class="seg w-full" role="group" aria-label="Filter writing by type">
+      <button type="button" class="seg-btn is-active" data-filter="all" aria-pressed="true">All</button>
+      <button type="button" class="seg-btn" data-filter="notebook" aria-pressed="false">Notebook</button>
+      <button type="button" class="seg-btn" data-filter="paper" aria-pressed="false">Papers</button>
+    </div>
   </div>
   <div class="scroll-rail" data-scroll-rail>
     <div class="scroll-rail__viewport">
@@ -47,6 +56,7 @@ const items = [
             <a
               class="surface scroll-rail__card snap-start p-5 no-underline transition hover:-translate-y-1"
               href={item.href}
+              data-content-type={item.type}
             >
               <p class="eyebrow accent-sky">{item.label}</p>
               <h3 class="mt-3 text-2xl font-black tracking-[-0.06em]">{item.title}</h3>
@@ -63,4 +73,11 @@ const items = [
       </div>
     </div>
   </div>
+  <p class="text-muted mt-6 is-hidden" data-content-empty-state>Nothing here yet in this category.</p>
 </section>
+
+<script>
+  import { initContentCarouselFilters } from "../lib/content-carousel-filter";
+  initContentCarouselFilters();
+  document.addEventListener("astro:after-swap", initContentCarouselFilters);
+</script>

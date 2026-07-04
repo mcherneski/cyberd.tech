@@ -437,24 +437,26 @@ button.surface:focus-visible {
 .card-context {
   flex-shrink: 0;
   padding: 0.15rem 0.45rem;
-  border: 1.5px solid var(--color-ink);
+  border: 1.5px solid var(--color-line);
   font-family: var(--font-mono);
   font-size: 0.6rem;
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-ink);
-  background: var(--color-paper);
+  background: transparent;
 }
 
 .card-context--hobby {
-  background: var(--color-yellow);
-  color: #0a0a0a;
+  border-color: #fff;
+}
+
+[data-theme="dark"] .card-context--hobby {
+  border-color: rgb(255 255 255 / 75%);
 }
 
 .card-context--professional {
-  background: var(--color-ink);
-  color: var(--color-paper);
+  border-color: var(--color-sky);
 }
 
 .scroll-rail {

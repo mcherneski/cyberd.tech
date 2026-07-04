@@ -1,9 +1,16 @@
 type Filter = "all" | "hobby" | "professional";
 
+const filterHeadings: Record<Filter, string> = {
+  all: "The work comes first.",
+  professional: "From enterprise to little guys.",
+  hobby: "Results from the workshop.",
+};
+
 function applyFilter(scope: HTMLElement, filter: Filter): void {
   const cards = scope.querySelectorAll<HTMLElement>("[data-context]");
   const buttons = scope.querySelectorAll<HTMLButtonElement>("[data-filter]");
   const empty = scope.querySelector<HTMLElement>("[data-empty-state]");
+  const heading = scope.querySelector<HTMLElement>("[data-project-filter-heading]");
 
   let visible = 0;
   cards.forEach((card) => {
@@ -19,6 +26,8 @@ function applyFilter(scope: HTMLElement, filter: Filter): void {
   });
 
   if (empty) empty.classList.toggle("is-hidden", visible !== 0);
+
+  if (heading) heading.textContent = filterHeadings[filter];
 }
 
 export function initProjectFilters(): void {
