@@ -3,7 +3,7 @@ import { getCollection } from "astro:content";
 import { agentReportFor } from "@lib/agent";
 
 export async function getStaticPaths() {
-  const notebook = await getCollection("notebook");
+  const notebook = await getCollection("notebook", ({ data }) => !data.draft);
   return notebook.map((entry) => ({
     params: { slug: entry.id },
     props: { entry },

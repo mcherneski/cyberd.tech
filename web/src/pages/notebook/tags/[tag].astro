@@ -5,7 +5,7 @@ import { getCollection } from "astro:content";
 import { normalizeSlug, slugLabel, sortByDateDesc } from "@lib/content";
 
 export async function getStaticPaths() {
-  const notebook = await getCollection("notebook");
+  const notebook = await getCollection("notebook", ({ data }) => !data.draft);
   const tags = Array.from(new Set(notebook.flatMap((entry) => entry.data.tags.map(normalizeSlug))));
 
   return tags.map((tag) => ({

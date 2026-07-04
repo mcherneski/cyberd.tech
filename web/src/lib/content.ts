@@ -71,8 +71,8 @@ export async function getSiteContent() {
   ]);
 
   return {
-    projects: sortByDateDesc(projects),
-    notebook: sortByDateDesc(notebook),
+    projects: sortByDateDesc(projects.filter((entry) => !entry.data.draft)),
+    notebook: sortByDateDesc(notebook.filter((entry) => !entry.data.draft)),
     papers: sortByDateDesc(papers),
     testimonials,
     credentials: sortCredentialsChronologically(credentialsForTimeline(credentials)),
