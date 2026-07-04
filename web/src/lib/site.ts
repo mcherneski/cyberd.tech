@@ -2,7 +2,7 @@ export const siteConfig = {
   name: "Cyberd",
   logo: "/cyberd-logo.png",
   logoAlt: "Cyberd",
-  tagline: "The personal site of Mike Cherneski",
+  tagline: "Mike Cherneski",
   photo: "/mike-cherneski.jpg",
   title: "Cyberd | Mike Cherneski, enterprise architect and builder",
   description:

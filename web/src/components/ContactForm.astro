@@ -4,6 +4,7 @@ import SocialLinks from "@components/SocialLinks.astro";
 const contactApiUrl = import.meta.env.PUBLIC_CONTACT_API_URL ?? "";
 const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
 const turnstileRequired = Boolean(contactApiUrl && turnstileSiteKey);
+const turnstileConfigured = Boolean(turnstileSiteKey);
 ---
 
 <section id="contact" class="container py-12">
@@ -41,17 +42,17 @@ const turnstileRequired = Boolean(contactApiUrl && turnstileSiteKey);
         <textarea class="field min-h-36 w-full" name="message" required maxlength="2000"></textarea>
       </label>
       {
-        turnstileRequired && (
-          <>
-            <div class="turnstile-slot" data-turnstile-slot>
-              <div
-                class="cf-turnstile"
-                data-sitekey={turnstileSiteKey}
-                data-action="turnstile-spin-v1"
-              />
-            </div>
-            <p class="turnstile-verified-badge" aria-hidden="true">Verified</p>
-          </>
+        turnstileConfigured && (
+          <div class="turnstile-slot" data-turnstile-slot>
+            <div
+              class="cf-turnstile"
+              data-turnstile-gate
+              data-sitekey={turnstileSiteKey}
+              data-appearance="interaction-only"
+              data-execution="execute"
+              data-action="turnstile-spin-v1"
+            />
+          </div>
         )
       }
       <button class="button justify-self-start" type="submit">Send signal</button>
@@ -74,12 +75,39 @@ const turnstileRequired = Boolean(contactApiUrl && turnstileSiteKey);
   </div>
 </section>
 
-{turnstileRequired && (
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer is:inline />
+{turnstileConfigured && (
+  <>
+    <script is:inline>
+      window.onloadCyberdTurnstile = function () {
+        var el = document.querySelector("[data-turnstile-gate]");
+        if (!el || !window.turnstile) return;
+        window.__cyberdTurnstileId = window.turnstile.render(el, {
+          sitekey: el.getAttribute("data-sitekey"),
+          appearance: "interaction-only",
+          execution: "execute",
+          action: "turnstile-spin-v1",
+          callback: function (token) {
+            window.dispatchEvent(new CustomEvent("cyberd-turnstile-token", { detail: { token: token } }));
+          },
+          "error-callback": function () {
+            window.dispatchEvent(new CustomEvent("cyberd-turnstile-error"));
+          },
+        });
+      };
+    </script>
+    <script
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onloadCyberdTurnstile"
+      async
+      defer
+      is:inline
+    />
+  </>
 )}
 
 <script>
-  import { hideTurnstileSlot, readTurnstileToken, showTurnstileSlot } from "../lib/turnstile-spin";
+  import { bindTurnstileGate, requestToken } from "../lib/turnstile-gate";
+
+  bindTurnstileGate();
 
   function setContactStatus(form: HTMLFormElement, message: string, visible = true) {
     const status = form.querySelector<HTMLElement>("[data-contact-status]");
@@ -105,21 +133,24 @@ const turnstileRequired = Boolean(contactApiUrl && turnstileSiteKey);
       const submitButton = form.querySelector<HTMLButtonElement>('button[type="submit"]');
 
       if (submitButton) submitButton.disabled = true;
+
+      // Turnstile tokens are single-use. Request a fresh token from the shared
+      // widget and let the contact API verify it server-side exactly once.
+      let token = "";
+      if (turnstileRequired) {
+        setContactStatus(form, "Verifying…");
+        try {
+          token = await requestToken();
+        } catch {
+          setContactStatus(form, "Verification unavailable. Reload the page and try again.");
+          if (submitButton) submitButton.disabled = false;
+          return;
+        }
+      }
+
       setContactStatus(form, "Sending…");
 
       try {
-        // Turnstile tokens are single-use: read the token here and let the
-        // contact API verify it server-side exactly once.
-        let token = "";
-        if (turnstileRequired) {
-          token = readTurnstileToken(form);
-          if (!token) {
-            setContactStatus(form, "Complete the verification challenge.");
-            return;
-          }
-          hideTurnstileSlot(form);
-        }
-
         const payload = {
           name: (form.elements.namedItem("name") as HTMLInputElement).value,
           email: (form.elements.namedItem("email") as HTMLInputElement).value,
@@ -136,7 +167,6 @@ const turnstileRequired = Boolean(contactApiUrl && turnstileSiteKey);
 
         const result = (await response.json()) as { ok?: boolean; error?: string };
         if (!response.ok || !result.ok) {
-          if (turnstileRequired) showTurnstileSlot(form);
           setContactStatus(form, result.error ?? "Could not send message.");
           return;
         }
@@ -144,7 +174,6 @@ const turnstileRequired = Boolean(contactApiUrl && turnstileSiteKey);
         form.reset();
         setContactStatus(form, "Message sent.", false);
       } catch {
-        if (form.getAttribute("data-turnstile-required") === "true") showTurnstileSlot(form);
         setContactStatus(form, "Network error. Try again.");
       } finally {
         if (submitButton) submitButton.disabled = false;

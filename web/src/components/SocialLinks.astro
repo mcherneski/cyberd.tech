@@ -1,20 +1,13 @@
 ---
 const socialApiUrl = import.meta.env.PUBLIC_SOCIAL_API_URL ?? "";
 const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
-const turnstileWorkerUrl = import.meta.env.PUBLIC_TURNSTILE_WORKER_URL ?? "";
 const turnstileReady = Boolean(socialApiUrl && turnstileSiteKey);
 ---
 
-<div
-  class="social-links mt-8"
-  data-social-root
-  data-api={socialApiUrl}
-  data-worker={turnstileWorkerUrl}
-  data-turnstile={turnstileSiteKey}
->
+<div class="social-links mt-8" data-social-root data-api={socialApiUrl}>
   <p class="eyebrow accent-sky">Direct channels</p>
   <p class="text-muted mt-2 text-sm">
-    LinkedIn, X, and Telegram links are verified before reveal to reduce bot scraping.
+    LinkedIn, X, and Telegram. Links load after a quick check that runs in the background to reduce bot scraping.
   </p>
 
   <div class="mt-4 flex flex-wrap gap-2">
@@ -30,19 +23,7 @@ const turnstileReady = Boolean(socialApiUrl && turnstileSiteKey);
   </div>
 
   {
-    turnstileReady ? (
-      <>
-        <div class="turnstile-slot mt-4" data-turnstile-slot>
-          <div
-            class="cf-turnstile"
-            data-sitekey={turnstileSiteKey}
-            data-callback="onSocialTurnstileSuccess"
-            data-action="turnstile-spin-v1"
-          />
-        </div>
-        <p class="turnstile-verified-badge" aria-hidden="true">Verified</p>
-      </>
-    ) : (
+    !turnstileReady && (
       <p class="text-muted mt-3 font-mono text-xs">
         Set PUBLIC_TURNSTILE_SITE_KEY and PUBLIC_SOCIAL_API_URL to enable protected social links.
       </p>
@@ -61,19 +42,8 @@ const turnstileReady = Boolean(socialApiUrl && turnstileSiteKey);
   <p class="text-muted mt-3 font-mono text-xs" data-social-status hidden />
 </div>
 
-{turnstileReady && (
-  <>
-    <script is:inline>
-      window.onSocialTurnstileSuccess = function (token) {
-        window.dispatchEvent(new CustomEvent("social-turnstile-success", { detail: { token } }));
-      };
-    </script>
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer is:inline />
-  </>
-)}
-
 <script>
-  import { hideTurnstileSlot, verifyTurnstileViaWorker } from "../lib/turnstile-spin";
+  import { bindTurnstileGate, gateActive, requestToken } from "../lib/turnstile-gate";
 
   type SocialLinks = Record<string, string>;
 
@@ -97,20 +67,20 @@ const turnstileReady = Boolean(socialApiUrl && turnstileSiteKey);
     });
   }
 
-  async function fetchSocialLinks(token: string) {
+  async function revealSocialLinks() {
     const root = document.querySelector("[data-social-root]");
     if (!root || fetchInFlight || cachedLinks) return;
 
     const api = root.getAttribute("data-api");
-    if (!api) {
-      setStatus("Social API URL is not configured.");
-      return;
-    }
+    if (!api || !gateActive()) return;
 
     fetchInFlight = true;
     setStatus("Unlocking channels…");
 
     try {
+      // The shared contact-section widget mints a single-use token; the social
+      // API performs the authoritative Turnstile verification server-side.
+      const token = await requestToken();
       const trap = document.querySelector<HTMLInputElement>("[data-social-trap]")?.value ?? "";
       const response = await fetch(api, {
         method: "POST",
@@ -126,10 +96,9 @@ const turnstileReady = Boolean(socialApiUrl && turnstileSiteKey);
 
       cachedLinks = payload.links;
       enableButtons(payload.links);
-      hideTurnstileSlot(root);
-      setStatus("Verified. Choose a channel.", false);
+      setStatus("Channels ready.", false);
     } catch {
-      setStatus("Network error. Try again.");
+      setStatus("Could not verify access. Reload to retry.");
     } finally {
       fetchInFlight = false;
     }
@@ -147,26 +116,7 @@ const turnstileReady = Boolean(socialApiUrl && turnstileSiteKey);
     });
   }
 
+  bindTurnstileGate();
   wireSocialButtons();
-  document.addEventListener("astro:after-swap", wireSocialButtons);
-
-  document.addEventListener("social-turnstile-success", async (event) => {
-    const root = document.querySelector("[data-social-root]");
-    const workerUrl = root?.getAttribute("data-worker") ?? "";
-    const spinReady = Boolean(workerUrl);
-    const token = (event as CustomEvent<{ token: string }>).detail?.token;
-
-    if (!token) return;
-
-    if (spinReady) {
-      setStatus("Verifying…");
-      const verified = await verifyTurnstileViaWorker(token, workerUrl);
-      if (!verified.success) {
-        setStatus("Verification failed. Try again.");
-        return;
-      }
-    }
-
-    await fetchSocialLinks(token);
-  });
+  revealSocialLinks();
 </script>

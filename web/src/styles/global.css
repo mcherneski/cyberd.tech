@@ -162,7 +162,8 @@ a:focus-visible {
 .wordmark__lockup {
   display: inline-flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.35rem;
+  padding-block: 0.15rem;
 }
 
 .wordmark__text {
@@ -180,6 +181,7 @@ a:focus-visible {
   text-transform: uppercase;
   color: var(--color-muted);
   line-height: 1;
+  padding-block: 0.2rem;
 }
 
 .surface {
@@ -253,37 +255,6 @@ a:focus-visible {
   border-image: none;
   color: inherit;
   box-shadow: none;
-}
-
-.turnstile-slot {
-  max-height: 5.5rem;
-  overflow: hidden;
-  transition:
-    max-height var(--dur) var(--ease),
-    opacity var(--dur) var(--ease),
-    margin var(--dur) var(--ease);
-}
-
-.turnstile-slot--verified {
-  max-height: 0;
-  opacity: 0;
-  margin-block: 0 !important;
-  pointer-events: none;
-  visibility: hidden;
-}
-
-.turnstile-verified-badge {
-  display: none;
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--color-muted);
-}
-
-.turnstile-slot--verified + .turnstile-verified-badge {
-  display: block;
-  margin-top: 0.25rem;
 }
 
 .nav-link {

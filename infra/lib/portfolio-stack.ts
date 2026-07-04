@@ -110,10 +110,22 @@ function handler(event) {
     );
 
     if (props.contactFromAddress) {
+      // Grant on both the exact email identity and its parent domain identity so
+      // the send works whether SES is verified per-address or per-domain (DKIM).
+      const fromDomain = props.contactFromAddress.split("@")[1];
+      const sesIdentityArns = [
+        `arn:${cdk.Aws.PARTITION}:ses:${this.region}:${this.account}:identity/${props.contactFromAddress}`,
+      ];
+      if (fromDomain) {
+        sesIdentityArns.push(
+          `arn:${cdk.Aws.PARTITION}:ses:${this.region}:${this.account}:identity/${fromDomain}`,
+        );
+      }
+
       contactHandler.addToRolePolicy(
         new iam.PolicyStatement({
           actions: ["ses:SendEmail", "ses:SendRawEmail"],
-          resources: [`arn:${cdk.Aws.PARTITION}:ses:${this.region}:${this.account}:identity/${props.contactFromAddress}`],
+          resources: sesIdentityArns,
         }),
       );
     }
