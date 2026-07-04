@@ -1,0 +1,66 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { entryPath } from "@lib/content";
+
+interface Props {
+  notebook: CollectionEntry<"notebook">[];
+  papers: CollectionEntry<"papers">[];
+}
+
+const { notebook, papers } = Astro.props;
+const items = [
+  ...notebook.slice(0, 4).map((entry) => ({
+    title: entry.data.title,
+    summary: entry.data.excerpt,
+    href: entryPath("notebook", entry.id),
+    label: "Notebook",
+  })),
+  ...papers.slice(0, 4).map((entry) => ({
+    title: entry.data.title,
+    summary: entry.data.summary,
+    href: entryPath("papers", entry.id),
+    label: "Paper",
+  })),
+];
+---
+
+<section class="container py-12">
+  <div class="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+    <div>
+      <p class="eyebrow accent-yellow">Notebook / papers</p>
+      <h2 class="text-4xl font-black tracking-[-0.07em]">Recent thinking.</h2>
+    </div>
+    <a class="button button-secondary" href="/notebook">Browse Notebook</a>
+  </div>
+  <div class="scroll-rail" data-scroll-rail>
+    <div class="scroll-rail__viewport">
+      <span class="scroll-rail__fade scroll-rail__fade--start" data-scroll-rail-fade-start aria-hidden="true" />
+      <div
+        class="scroll-rail__scroll scroll-rail__scroll--cards"
+        data-scroll-rail-scroll
+        tabindex="0"
+        role="region"
+        aria-label="Recent thinking"
+      >
+        {
+          items.map((item) => (
+            <a
+              class="surface scroll-rail__card snap-start p-5 no-underline transition hover:-translate-y-1"
+              href={item.href}
+            >
+              <p class="eyebrow accent-sky">{item.label}</p>
+              <h3 class="mt-3 text-2xl font-black tracking-[-0.06em]">{item.title}</h3>
+              <p class="text-muted mt-3 text-sm leading-6">{item.summary}</p>
+            </a>
+          ))
+        }
+      </div>
+      <span class="scroll-rail__fade scroll-rail__fade--end" data-scroll-rail-fade-end aria-hidden="true" />
+    </div>
+    <div class="scroll-rail__progress is-hidden" data-scroll-rail-progress>
+      <div class="scroll-rail__track" data-scroll-rail-track>
+        <span class="scroll-rail__thumb" data-scroll-rail-thumb />
+      </div>
+    </div>
+  </div>
+</section>

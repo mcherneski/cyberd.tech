@@ -1,0 +1,76 @@
+<button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode">
+  <svg
+    class="theme-toggle__icon theme-toggle__icon--sun is-hidden"
+    data-theme-icon="sun"
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="square"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+  </svg>
+  <svg
+    class="theme-toggle__icon theme-toggle__icon--moon"
+    data-theme-icon="moon"
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="square"
+    aria-hidden="true"
+  >
+    <path d="M20 14.5A7.5 7.5 0 0 1 9.5 4 6 6 0 1 0 20 14.5z"></path>
+  </svg>
+</button>
+
+<script>
+  const storageKey = "cyberd-theme";
+
+  function applyTheme(theme: "light" | "dark") {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem(storageKey, theme);
+
+    const toggle = document.querySelector<HTMLButtonElement>("[data-theme-toggle]");
+    const sun = document.querySelector<SVGElement>("[data-theme-icon='sun']");
+    const moon = document.querySelector<SVGElement>("[data-theme-icon='moon']");
+
+    if (toggle) {
+      toggle.setAttribute(
+        "aria-label",
+        theme === "dark" ? "Switch to light mode" : "Switch to dark mode",
+      );
+    }
+
+    sun?.classList.toggle("is-hidden", theme !== "dark");
+    moon?.classList.toggle("is-hidden", theme !== "light");
+
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      meta.setAttribute("content", theme === "dark" ? "#0a0a0a" : "#fafafa");
+    }
+  }
+
+  function initThemeToggle() {
+    const stored = localStorage.getItem(storageKey);
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const initial = stored === "light" || stored === "dark" ? stored : prefersDark ? "dark" : "light";
+    applyTheme(initial);
+
+    document.querySelector("[data-theme-toggle]")?.addEventListener("click", () => {
+      const current = document.documentElement.getAttribute("data-theme");
+      applyTheme(current === "dark" ? "light" : "dark");
+    });
+  }
+
+  initThemeToggle();
+  document.addEventListener("astro:after-swap", initThemeToggle);
+</script>

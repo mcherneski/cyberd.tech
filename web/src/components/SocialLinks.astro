@@ -1,0 +1,172 @@
+---
+const socialApiUrl = import.meta.env.PUBLIC_SOCIAL_API_URL ?? "";
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
+const turnstileWorkerUrl = import.meta.env.PUBLIC_TURNSTILE_WORKER_URL ?? "";
+const turnstileReady = Boolean(socialApiUrl && turnstileSiteKey);
+---
+
+<div
+  class="social-links mt-8"
+  data-social-root
+  data-api={socialApiUrl}
+  data-worker={turnstileWorkerUrl}
+  data-turnstile={turnstileSiteKey}
+>
+  <p class="eyebrow accent-sky">Direct channels</p>
+  <p class="text-muted mt-2 text-sm">
+    LinkedIn, X, and Telegram links are verified before reveal to reduce bot scraping.
+  </p>
+
+  <div class="mt-4 flex flex-wrap gap-2">
+    <button type="button" class="button button-secondary social-link-btn" data-network="linkedin" disabled>
+      LinkedIn
+    </button>
+    <button type="button" class="button button-secondary social-link-btn" data-network="x" disabled>
+      X
+    </button>
+    <button type="button" class="button button-secondary social-link-btn" data-network="telegram" disabled>
+      Telegram
+    </button>
+  </div>
+
+  {
+    turnstileReady ? (
+      <>
+        <div class="turnstile-slot mt-4" data-turnstile-slot>
+          <div
+            class="cf-turnstile"
+            data-sitekey={turnstileSiteKey}
+            data-callback="onSocialTurnstileSuccess"
+            data-action="turnstile-spin-v1"
+          />
+        </div>
+        <p class="turnstile-verified-badge" aria-hidden="true">Verified</p>
+      </>
+    ) : (
+      <p class="text-muted mt-3 font-mono text-xs">
+        Set PUBLIC_TURNSTILE_SITE_KEY and PUBLIC_SOCIAL_API_URL to enable protected social links.
+      </p>
+    )
+  }
+
+  <input
+    type="text"
+    name="social_trap"
+    class="hidden"
+    tabindex="-1"
+    autocomplete="off"
+    aria-hidden="true"
+    data-social-trap
+  />
+  <p class="text-muted mt-3 font-mono text-xs" data-social-status hidden />
+</div>
+
+{turnstileReady && (
+  <>
+    <script is:inline>
+      window.onSocialTurnstileSuccess = function (token) {
+        window.dispatchEvent(new CustomEvent("social-turnstile-success", { detail: { token } }));
+      };
+    </script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer is:inline />
+  </>
+)}
+
+<script>
+  import { hideTurnstileSlot, verifyTurnstileViaWorker } from "../lib/turnstile-spin";
+
+  type SocialLinks = Record<string, string>;
+
+  let cachedLinks: SocialLinks | null = null;
+  let fetchInFlight = false;
+
+  function setStatus(message: string, visible = true) {
+    const status = document.querySelector<HTMLElement>("[data-social-status]");
+    if (!status) return;
+    status.textContent = message;
+    status.hidden = !visible;
+  }
+
+  function enableButtons(links: SocialLinks) {
+    document.querySelectorAll<HTMLButtonElement>(".social-link-btn").forEach((button) => {
+      const network = button.dataset.network;
+      if (network && links[network]) {
+        button.disabled = false;
+        button.dataset.href = links[network];
+      }
+    });
+  }
+
+  async function fetchSocialLinks(token: string) {
+    const root = document.querySelector("[data-social-root]");
+    if (!root || fetchInFlight || cachedLinks) return;
+
+    const api = root.getAttribute("data-api");
+    if (!api) {
+      setStatus("Social API URL is not configured.");
+      return;
+    }
+
+    fetchInFlight = true;
+    setStatus("Unlocking channels…");
+
+    try {
+      const trap = document.querySelector<HTMLInputElement>("[data-social-trap]")?.value ?? "";
+      const response = await fetch(api, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, trap }),
+      });
+
+      const payload = (await response.json()) as { ok?: boolean; links?: SocialLinks; error?: string };
+      if (!response.ok || !payload.ok || !payload.links) {
+        setStatus(payload.error ?? "Could not verify access.");
+        return;
+      }
+
+      cachedLinks = payload.links;
+      enableButtons(payload.links);
+      hideTurnstileSlot(root);
+      setStatus("Verified. Choose a channel.", false);
+    } catch {
+      setStatus("Network error. Try again.");
+    } finally {
+      fetchInFlight = false;
+    }
+  }
+
+  function wireSocialButtons() {
+    document.querySelectorAll<HTMLButtonElement>(".social-link-btn").forEach((button) => {
+      if (button.dataset.wired === "true") return;
+      button.dataset.wired = "true";
+      button.addEventListener("click", () => {
+        const href = button.dataset.href;
+        if (!href) return;
+        window.open(href, "_blank", "noopener,noreferrer");
+      });
+    });
+  }
+
+  wireSocialButtons();
+  document.addEventListener("astro:after-swap", wireSocialButtons);
+
+  document.addEventListener("social-turnstile-success", async (event) => {
+    const root = document.querySelector("[data-social-root]");
+    const workerUrl = root?.getAttribute("data-worker") ?? "";
+    const spinReady = Boolean(workerUrl);
+    const token = (event as CustomEvent<{ token: string }>).detail?.token;
+
+    if (!token) return;
+
+    if (spinReady) {
+      setStatus("Verifying…");
+      const verified = await verifyTurnstileViaWorker(token, workerUrl);
+      if (!verified.success) {
+        setStatus("Verification failed. Try again.");
+        return;
+      }
+    }
+
+    await fetchSocialLinks(token);
+  });
+</script>

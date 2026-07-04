@@ -1,0 +1,23 @@
+{
+  "name": "cyberd-portfolio",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.12.0",
+    "npm": ">=9.6.5"
+  },
+  "workspaces": [
+    "web",
+    "infra"
+  ],
+  "scripts": {
+    "build": "npm run build -w web",
+    "dev": "npm run dev -w web",
+    "lint": "npm run check -w web && npm run typecheck -w infra",
+    "synth": "npm run synth -w infra",
+    "turnstile:setup": "python scripts/turnstile-spin-deploy-worker.py"
+  },
+  "devDependencies": {
+    "wrangler": "^4.106.0"
+  }
+}

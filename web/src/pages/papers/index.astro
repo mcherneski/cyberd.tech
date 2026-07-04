@@ -1,0 +1,25 @@
+---
+import Card from "@components/Card.astro";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { getSiteContent } from "@lib/content";
+import { personJsonLd } from "@lib/jsonld";
+
+const { papers } = await getSiteContent();
+---
+
+<BaseLayout title="Papers | Cyberd" description="Uploaded papers and PDF-backed research notes." jsonLd={personJsonLd()} agentHref="/papers.md">
+  <section class="container py-14">
+    <p class="eyebrow accent-yellow">PDF archive</p>
+    <h1 class="mt-3 text-6xl font-black tracking-[-0.09em]">Papers.</h1>
+    <p class="mt-4 max-w-2xl text-xl leading-8 text-muted">
+      PDF-backed writing with human summaries and machine-readable agent reports.
+    </p>
+    <div class="grid-auto mt-8">
+      {
+        papers.map((paper) => (
+          <Card href={`/papers/${paper.id}`} eyebrow={paper.data.category} title={paper.data.title} summary={paper.data.summary} accent="yellow" />
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>

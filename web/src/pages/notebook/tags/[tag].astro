@@ -1,0 +1,36 @@
+---
+import Card from "@components/Card.astro";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import { normalizeSlug, slugLabel, sortByDateDesc } from "@lib/content";
+
+export async function getStaticPaths() {
+  const notebook = await getCollection("notebook");
+  const tags = Array.from(new Set(notebook.flatMap((entry) => entry.data.tags.map(normalizeSlug))));
+
+  return tags.map((tag) => ({
+    params: { tag },
+    props: {
+      tag,
+      entries: sortByDateDesc(notebook.filter((entry) => entry.data.tags.map(normalizeSlug).includes(tag))),
+    },
+  }));
+}
+
+const { tag, entries } = Astro.props;
+---
+
+<BaseLayout title={`#${slugLabel(tag)} | Notebook Tags | Cyberd`} description={`Notebook entries tagged ${slugLabel(tag)}.`}>
+  <section class="container py-14">
+    <a class="font-mono text-sm font-bold" href="/notebook">&lt;- Notebook</a>
+    <p class="eyebrow accent-sky mt-6">Tag</p>
+    <h1 class="mt-3 text-6xl font-black tracking-[-0.09em]">#{slugLabel(tag)}</h1>
+    <div class="grid-auto mt-8">
+      {
+        entries.map((entry) => (
+          <Card href={`/notebook/${entry.id}`} eyebrow={entry.data.category} title={entry.data.title} summary={entry.data.excerpt} />
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>

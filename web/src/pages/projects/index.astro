@@ -1,0 +1,42 @@
+---
+import Card from "@components/Card.astro";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { getSiteContent } from "@lib/content";
+import { personJsonLd } from "@lib/jsonld";
+
+const { projects } = await getSiteContent();
+---
+
+<BaseLayout title="Projects | Cyberd" description="Selected systems, case studies, and experiments." jsonLd={personJsonLd()} agentHref="/projects.md">
+  <section class="container py-14" data-project-filter>
+    <p class="eyebrow accent-yellow">Archive</p>
+    <h1 class="mt-3 text-6xl font-black tracking-[-0.09em]">Projects.</h1>
+    <p class="mt-4 max-w-2xl text-xl leading-8 text-muted">
+      Professional engagements and hobby builds across AI, cloud and serverless, hardware, and everything I like to tinker with. Filter by what you came for.
+    </p>
+    <div class="seg mt-8 w-full" role="group" aria-label="Filter projects by type">
+      <button type="button" class="seg-btn is-active" data-filter="all" aria-pressed="true">All</button>
+      <button type="button" class="seg-btn" data-filter="professional" aria-pressed="false">Professional</button>
+      <button type="button" class="seg-btn" data-filter="hobby" aria-pressed="false">Hobby</button>
+    </div>
+    <div class="grid-auto mt-8">
+      {
+        projects.map((project, index) => (
+          <Card
+            href={`/projects/${project.id}`}
+            eyebrow={`${project.data.status} / ${project.data.category}`}
+            title={project.data.title}
+            summary={project.data.summary}
+            accent={index % 3 === 0 ? "sky" : index % 3 === 1 ? "yellow" : "crimson"}
+            context={project.data.context}
+          />
+        ))
+      }
+    </div>
+    <p class="text-muted mt-6 is-hidden" data-empty-state>Nothing here yet — new projects in this category are on the way.</p>
+  </section>
+  <script>
+    import { initProjectFilters } from "../../lib/project-filter";
+    initProjectFilters();
+  </script>
+</BaseLayout>

@@ -1,0 +1,38 @@
+---
+interface Props {
+  href?: string;
+  eyebrow?: string;
+  title: string;
+  summary: string;
+  accent?: "sky" | "yellow" | "crimson";
+  context?: "hobby" | "professional";
+}
+
+const { href, eyebrow, title, summary, accent = "sky", context } = Astro.props;
+const contextLabel =
+  context === "hobby" ? "Hobby" : context === "professional" ? "Professional" : context;
+const accentClass = {
+  sky: "accent-sky",
+  yellow: "accent-yellow",
+  crimson: "accent-crimson",
+}[accent];
+const Tag = href ? "a" : "article";
+---
+
+<Tag
+  href={href}
+  data-context={context}
+  class="surface group block p-5 no-underline transition hover:-translate-x-1 hover:-translate-y-1 hover:border-[var(--color-hover)]"
+>
+  {
+    (eyebrow || context) && (
+      <div class="flex items-start justify-between gap-3">
+        {eyebrow ? <p class={`eyebrow ${accentClass}`}>{eyebrow}</p> : <span />}
+        {context && <span class={`card-context card-context--${context}`}>{contextLabel}</span>}
+      </div>
+    )
+  }
+  <h3 class="mt-3 text-2xl font-black leading-tight tracking-[-0.06em]">{title}</h3>
+  <p class="text-muted mt-3 text-sm leading-6">{summary}</p>
+  {href && <span class="mt-5 inline-block font-mono text-sm font-extrabold">Open -></span>}
+</Tag>

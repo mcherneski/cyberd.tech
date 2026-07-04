@@ -1,0 +1,107 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  credentials: CollectionEntry<"credentials">[];
+  detail?: boolean;
+  linkHref?: string;
+}
+
+const { credentials, detail = false, linkHref } = Astro.props;
+
+const typeAccent = {
+  founder: "accent-green",
+  enterprise: "accent-sky",
+  startup: "accent-crimson",
+  education: "accent-sky",
+  credential: "accent-crimson",
+} as const;
+
+const nodeAccent = {
+  founder: "experience-timeline__node--green",
+  enterprise: "experience-timeline__node--sky",
+  startup: "experience-timeline__node--crimson",
+  education: "experience-timeline__node--sky",
+  credential: "experience-timeline__node--crimson",
+} as const;
+---
+
+<section class="container py-12">
+  <div class="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+    <div>
+      <p class="eyebrow accent-sky">Credentials</p>
+      <h2 class="text-4xl font-black tracking-[-0.07em]">Experience, on a timeline.</h2>
+      <p class="text-muted mt-2 max-w-xl text-sm leading-6">Scroll through roles — oldest to newest.</p>
+    </div>
+    {linkHref && <a class="button button-secondary" href={linkHref}>Full file -&gt;</a>}
+  </div>
+
+  <div class="experience-timeline scroll-rail scroll-rail--arrows" data-scroll-rail>
+    <div class="scroll-rail__viewport">
+      <span class="scroll-rail__fade scroll-rail__fade--start" data-scroll-rail-fade-start aria-hidden="true" />
+      <button
+        type="button"
+        class="scroll-rail__arrow scroll-rail__arrow--prev"
+        data-scroll-rail-arrow-prev
+        aria-label="Scroll to earlier roles"
+      >
+        ←
+      </button>
+      <div
+        class="experience-timeline__scroll scroll-rail__scroll"
+        data-scroll-rail-scroll
+        tabindex="0"
+        role="region"
+        aria-label="Career timeline"
+      >
+        {
+          credentials.map((credential, index) => (
+            <article class="experience-timeline__item snap-start">
+              <div class="experience-timeline__marker">
+                <span
+                  class={`experience-timeline__node ${nodeAccent[credential.data.type]}`}
+                  aria-hidden="true"
+                />
+                {index < credentials.length - 1 && <span class="experience-timeline__segment" aria-hidden="true" />}
+              </div>
+              <div class="surface experience-timeline__card p-5">
+                <p class={`eyebrow ${typeAccent[credential.data.type]}`}>{credential.data.type}</p>
+                <p class="font-mono mt-3 text-xs font-bold uppercase tracking-widest text-muted">
+                  {credential.data.start} - {credential.data.end ?? "Present"}
+                </p>
+                <h3 class="mt-2 text-2xl font-black tracking-[-0.06em]">{credential.data.title}</h3>
+                <p class="mt-1 text-sm font-bold">{credential.data.organization}</p>
+                <p class="text-muted mt-3 text-sm leading-6">{credential.data.summary}</p>
+                {
+                  detail && credential.data.bullets.length > 0 && (
+                    <ul class="mt-4 grid gap-2 text-sm">
+                      {
+                        credential.data.bullets.map((bullet) => (
+                          <li class="border-l-4 border-[color:var(--color-ink)] pl-3">{bullet}</li>
+                        ))
+                      }
+                    </ul>
+                  )
+                }
+              </div>
+            </article>
+          ))
+        }
+      </div>
+      <span class="scroll-rail__fade scroll-rail__fade--end" data-scroll-rail-fade-end aria-hidden="true" />
+      <button
+        type="button"
+        class="scroll-rail__arrow scroll-rail__arrow--next"
+        data-scroll-rail-arrow-next
+        aria-label="Scroll to later roles"
+      >
+        →
+      </button>
+    </div>
+    <div class="scroll-rail__progress is-hidden" data-scroll-rail-progress>
+      <div class="scroll-rail__track" data-scroll-rail-track>
+        <span class="scroll-rail__thumb" data-scroll-rail-thumb />
+      </div>
+    </div>
+  </div>
+</section>

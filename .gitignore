@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.astro/
+.aws-sam/
+cdk.out/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+.tmp/
+Screenshot*.png

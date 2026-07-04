@@ -1,0 +1,60 @@
+name: Deploy portfolio
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SITE_URL: ${{ vars.SITE_URL || 'https://example.com' }}
+      PUBLIC_CONTACT_API_URL: ${{ vars.PUBLIC_CONTACT_API_URL }}
+      PUBLIC_SOCIAL_API_URL: ${{ vars.PUBLIC_SOCIAL_API_URL }}
+      PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.PUBLIC_TURNSTILE_SITE_KEY }}
+      PUBLIC_TURNSTILE_WORKER_URL: ${{ vars.PUBLIC_TURNSTILE_WORKER_URL }}
+      DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
+      HOSTED_ZONE_ID: ${{ vars.HOSTED_ZONE_ID }}
+      HOSTED_ZONE_NAME: ${{ vars.HOSTED_ZONE_NAME }}
+      CONTACT_TO_ADDRESS: ${{ secrets.CONTACT_TO_ADDRESS }}
+      CONTACT_FROM_ADDRESS: ${{ secrets.CONTACT_FROM_ADDRESS }}
+      TURNSTILE_SITEVERIFY_URL: ${{ vars.TURNSTILE_SITEVERIFY_URL }}
+      TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+      SOCIAL_LINKEDIN_URL: ${{ vars.SOCIAL_LINKEDIN_URL }}
+      SOCIAL_X_URL: ${{ vars.SOCIAL_X_URL }}
+      SOCIAL_TELEGRAM_URL: ${{ vars.SOCIAL_TELEGRAM_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.12"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build static site
+        run: npm run build -w web
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: CDK synth
+        run: npm run synth
+        working-directory: infra
+
+      - name: CDK deploy
+        run: npm run deploy -- --require-approval never
+        working-directory: infra

@@ -1,0 +1,22 @@
+---
+import { normalizeSlug } from "@lib/content";
+
+interface Props {
+  tags: string[];
+  base?: string;
+}
+
+const { tags, base = "/notebook/tags" } = Astro.props;
+---
+
+<ul class="flex flex-wrap gap-2">
+  {
+    tags.map((tag) => (
+      <li>
+        <a class="tag-link" href={`${base}/${normalizeSlug(tag)}`}>
+          #{tag}
+        </a>
+      </li>
+    ))
+  }
+</ul>

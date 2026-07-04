@@ -1,0 +1,169 @@
+---
+import SocialLinks from "@components/SocialLinks.astro";
+
+const contactApiUrl = import.meta.env.PUBLIC_CONTACT_API_URL ?? "";
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
+const turnstileWorkerUrl = import.meta.env.PUBLIC_TURNSTILE_WORKER_URL ?? "";
+const turnstileRequired = Boolean(contactApiUrl && turnstileSiteKey && turnstileWorkerUrl);
+---
+
+<section id="contact" class="container py-12">
+  <div class="surface grid gap-8 p-6 md:grid-cols-[0.8fr_1.2fr] md:p-8">
+    <div>
+      <p class="eyebrow accent-crimson">Work with me</p>
+      <h2 class="mt-3 text-4xl font-black tracking-[-0.07em]">Let's build something.</h2>
+      <p class="text-muted mt-4">
+        Data-readiness assessments, enterprise architecture and AI-modernization planning, and cloud consulting — as a project, retainer, or advisory call. Tell me what you're working on and I'll reply personally.
+      </p>
+      <SocialLinks />
+    </div>
+    <form
+      class="grid gap-4"
+      method="post"
+      action={contactApiUrl || "/contact-disabled"}
+      data-contact-form
+      data-api={contactApiUrl}
+      data-worker={turnstileWorkerUrl}
+      data-turnstile-required={turnstileRequired ? "true" : "false"}
+    >
+      <label class="grid gap-2 font-bold">
+        Name
+        <input class="field w-full" name="name" autocomplete="name" required maxlength="120" />
+      </label>
+      <label class="grid gap-2 font-bold">
+        Email
+        <input class="field w-full" type="email" name="email" autocomplete="email" required maxlength="180" />
+      </label>
+      <label class="hidden" aria-hidden="true">
+        Company website
+        <input name="website" tabindex="-1" autocomplete="off" />
+      </label>
+      <label class="grid gap-2 font-bold">
+        Message
+        <textarea class="field min-h-36 w-full" name="message" required maxlength="2000"></textarea>
+      </label>
+      {
+        turnstileRequired && (
+          <>
+            <div class="turnstile-slot" data-turnstile-slot>
+              <div
+                class="cf-turnstile"
+                data-sitekey={turnstileSiteKey}
+                data-action="turnstile-spin-v1"
+              />
+            </div>
+            <p class="turnstile-verified-badge" aria-hidden="true">Verified</p>
+          </>
+        )
+      }
+      <button class="button justify-self-start" type="submit">Send signal</button>
+      <p class="text-muted font-mono text-xs" data-contact-status hidden />
+      {
+        !contactApiUrl && (
+          <p class="text-muted font-mono text-xs">
+            Set PUBLIC_CONTACT_API_URL after deploying the API to enable submissions.
+          </p>
+        )
+      }
+      {
+        contactApiUrl && !turnstileRequired && (
+          <p class="text-muted font-mono text-xs">
+            Set PUBLIC_TURNSTILE_SITE_KEY and PUBLIC_TURNSTILE_WORKER_URL to enable bot protection.
+          </p>
+        )
+      }
+    </form>
+  </div>
+</section>
+
+{turnstileRequired && (
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer is:inline />
+)}
+
+<script>
+  import {
+    hideTurnstileSlot,
+    readTurnstileToken,
+    showTurnstileSlot,
+    verifyTurnstileViaWorker,
+  } from "../lib/turnstile-spin";
+
+  function setContactStatus(form: HTMLFormElement, message: string, visible = true) {
+    const status = form.querySelector<HTMLElement>("[data-contact-status]");
+    if (!status) return;
+    status.textContent = message;
+    status.hidden = !visible;
+  }
+
+  function wireContactForm(form: HTMLFormElement) {
+    if (form.dataset.wired === "true") return;
+    form.dataset.wired = "true";
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const api = form.getAttribute("data-api");
+      if (!api) {
+        setContactStatus(form, "Contact API URL is not configured.");
+        return;
+      }
+
+      const turnstileRequired = form.getAttribute("data-turnstile-required") === "true";
+      const workerUrl = form.getAttribute("data-worker") ?? "";
+      const submitButton = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+
+      if (submitButton) submitButton.disabled = true;
+      setContactStatus(form, turnstileRequired ? "Verifying…" : "Sending…");
+
+      try {
+        if (turnstileRequired) {
+          const token = readTurnstileToken(form);
+          if (!token) {
+            setContactStatus(form, "Complete the verification challenge.");
+            return;
+          }
+
+          const verified = await verifyTurnstileViaWorker(token, workerUrl);
+          if (!verified.success) {
+            setContactStatus(form, "Verification failed. Try again.");
+            return;
+          }
+          hideTurnstileSlot(form);
+        }
+
+        const payload = {
+          name: (form.elements.namedItem("name") as HTMLInputElement).value,
+          email: (form.elements.namedItem("email") as HTMLInputElement).value,
+          message: (form.elements.namedItem("message") as HTMLTextAreaElement).value,
+          website: (form.elements.namedItem("website") as HTMLInputElement).value,
+        };
+
+        const response = await fetch(api, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const result = (await response.json()) as { ok?: boolean; error?: string };
+        if (!response.ok || !result.ok) {
+          if (turnstileRequired) showTurnstileSlot(form);
+          setContactStatus(form, result.error ?? "Could not send message.");
+          return;
+        }
+
+        form.reset();
+        setContactStatus(form, "Message sent.", false);
+      } catch {
+        if (form.getAttribute("data-turnstile-required") === "true") showTurnstileSlot(form);
+        setContactStatus(form, "Network error. Try again.");
+      } finally {
+        if (submitButton) submitButton.disabled = false;
+      }
+    });
+  }
+
+  document.querySelectorAll<HTMLFormElement>("[data-contact-form]").forEach(wireContactForm);
+  document.addEventListener("astro:after-swap", () => {
+    document.querySelectorAll<HTMLFormElement>("[data-contact-form]").forEach(wireContactForm);
+  });
+</script>

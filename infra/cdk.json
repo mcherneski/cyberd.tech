@@ -1,0 +1,6 @@
+{
+  "app": "npx tsx bin/cyberd-infra.ts",
+  "context": {
+    "@aws-cdk/core:newStyleStackSynthesis": true
+  }
+}

@@ -1,0 +1,123 @@
+---
+import "@styles/global.css";
+import ThemeInit from "@components/ThemeInit.astro";
+import ThemeToggle from "@components/ThemeToggle.astro";
+import { absoluteUrl, siteConfig } from "@lib/site";
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  canonical?: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  agentHref?: string;
+}
+
+const {
+  title = siteConfig.title,
+  description = siteConfig.description,
+  image = siteConfig.logo,
+  canonical = Astro.url.pathname,
+  jsonLd,
+  agentHref,
+} = Astro.props;
+
+const canonicalUrl = absoluteUrl(canonical);
+const imageUrl = absoluteUrl(image);
+const ld = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
+const isHome = canonical === "/" || canonical === "/index.html";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#fafafa" />
+    <link rel="icon" type="image/png" href="/cyberd-logo.png" />
+    <link rel="apple-touch-icon" href="/cyberd-logo.png" />
+    <ThemeInit />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    {agentHref && <link rel="alternate" type="text/markdown" href={absoluteUrl(agentHref)} />}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={imageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>{title}</title>
+    {
+      ld.map((item) => (
+        <script type="application/ld+json" set:html={JSON.stringify(item)} />
+      ))
+    }
+  </head>
+  <body>
+    <a class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 button" href="#main">
+      Skip to content
+    </a>
+    <header class="container py-5">
+      <nav class="surface flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between">
+        <a
+          class="wordmark no-underline"
+          href="/"
+          aria-label="Cyberd home"
+          {...(isHome ? { "aria-current": "page" } : {})}
+        >
+          <img
+            class="wordmark__logo"
+            src={siteConfig.logo}
+            alt=""
+            width="44"
+            height="44"
+            decoding="async"
+          />
+          <span class="wordmark__lockup">
+            <span class="wordmark__text">
+              {siteConfig.name}<span class="accent-sky">.</span>
+            </span>
+            <span class="wordmark__sub">{siteConfig.tagline}</span>
+          </span>
+        </a>
+        <div class="flex flex-wrap items-center gap-2">
+          {
+            siteConfig.nav.map((item) => (
+              <a class="nav-link" href={item.href}>
+                {item.label}
+              </a>
+            ))
+          }
+          <ThemeToggle />
+        </div>
+      </nav>
+    </header>
+    <main id="main">
+      <slot />
+    </main>
+    <footer class="container py-10">
+      <div class="surface-muted grid gap-4 p-5 md:grid-cols-[1fr_auto] md:items-center">
+        <div>
+          <p class="eyebrow">AI-native portfolio</p>
+          <p class="text-muted mt-2 max-w-2xl text-sm">
+            Humans get the site. Agents get structured metadata, Markdown alternates, and curated context.
+          </p>
+        </div>
+        <div class="flex gap-3">
+          <a href="/llms.txt" class="font-mono text-sm font-bold">llms.txt</a>
+          <a href="/llms-full.txt" class="font-mono text-sm font-bold">llms-full.txt</a>
+        </div>
+      </div>
+    </footer>
+    <script>
+      import { initScrollRails } from "../lib/scroll-rail";
+      initScrollRails();
+    </script>
+  </body>
+</html>
