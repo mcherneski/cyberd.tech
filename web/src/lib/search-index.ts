@@ -4,6 +4,8 @@ export type SearchIndexEntry = {
   href: string;
   type: "Notebook" | "Project" | "Paper";
   tags: string[];
+  complexity?: number;
+  date?: number;
 };
 
 export function searchIndex(entries: SearchIndexEntry[], query: string, limit = 12): SearchIndexEntry[] {

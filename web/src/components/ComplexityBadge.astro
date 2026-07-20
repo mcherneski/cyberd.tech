@@ -1,0 +1,14 @@
+---
+import { complexityFullLabel, complexityLabel, type ComplexityLevel } from "@lib/complexity";
+
+interface Props {
+  level: ComplexityLevel;
+  compact?: boolean;
+}
+
+const { level, compact = false } = Astro.props;
+---
+
+<span class="complexity-badge" title={complexityFullLabel(level)}>
+  {compact ? complexityLabel(level) : complexityFullLabel(level)}
+</span>

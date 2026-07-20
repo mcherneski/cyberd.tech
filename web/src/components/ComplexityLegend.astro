@@ -1,0 +1,31 @@
+---
+import { COMPLEXITY_DESCRIPTIONS, COMPLEXITY_LEVELS, complexityLabel } from "@lib/complexity";
+
+interface Props {
+  embedded?: boolean;
+}
+
+const { embedded = false } = Astro.props;
+---
+
+<div class:list={[{ "surface-muted p-4": !embedded }, { "notebook-search-panel__filters": embedded }]}>
+  <p class="eyebrow accent-yellow">Technical depth</p>
+  <p class="text-muted mt-1 text-sm">Multi-select — toggle any combination.</p>
+  <div class="mt-3 grid gap-2" data-complexity-legend role="group" aria-label="Filter notebook by technical complexity">
+    {
+      COMPLEXITY_LEVELS.map((level) => (
+        <button
+          type="button"
+          class="complexity-legend-item is-active"
+          data-complexity-filter={level}
+          data-complexity-legend={level}
+          aria-pressed="true"
+          title={`Toggle level ${level}: ${complexityLabel(level)}`}
+        >
+          <span class="complexity-legend-item__label font-mono text-xs font-bold uppercase tracking-widest">{level} {complexityLabel(level)}</span>
+          <span class="complexity-legend-item__desc text-muted"> — {COMPLEXITY_DESCRIPTIONS[level]}</span>
+        </button>
+      ))
+    }
+  </div>
+</div>

@@ -1,5 +1,6 @@
 ---
 import Card from "@components/Card.astro";
+import NotebookControls from "@components/NotebookControls.astro";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 import { normalizeSlug, slugLabel, sortByDateDesc } from "@lib/content";
@@ -20,17 +21,33 @@ export async function getStaticPaths() {
 const { category, entries } = Astro.props;
 ---
 
-<BaseLayout title={`${slugLabel(category)} | Notebook Categories | Cyberd`} description={`Notebook entries in ${slugLabel(category)}.`}>
-  <section class="container py-14">
+<BaseLayout title={`${slugLabel(category)} | Notebook Categories | Cyberd`} description={`Notebook entries in ${slugLabel(category)}.`} agentHref="/notebook.md">
+  <section class="container py-14" data-notebook-filter>
     <a class="font-mono text-sm font-bold" href="/notebook">&lt;- Notebook</a>
     <p class="eyebrow accent-crimson mt-6">Category</p>
     <h1 class="mt-3 text-6xl font-black tracking-[-0.09em]">{slugLabel(category)}</h1>
-    <div class="grid-auto mt-8">
-      {
-        entries.map((entry) => (
-          <Card href={`/notebook/${entry.id}`} eyebrow={entry.data.category} title={entry.data.title} summary={entry.data.excerpt} accent="crimson" />
-        ))
-      }
+    <div class="mt-8 min-w-0">
+      <NotebookControls sortMenuId="notebook-sort-category" />
+      <div class="grid-auto" data-notebook-list>
+        {
+          entries.map((entry) => (
+            <Card
+              href={`/notebook/${entry.id}`}
+              eyebrow={entry.data.category}
+              title={entry.data.title}
+              summary={entry.data.excerpt}
+              accent="crimson"
+              complexity={entry.data.complexity}
+              date={entry.data.date.valueOf()}
+            />
+          ))
+        }
+      </div>
+      <p class="text-muted mt-6 is-hidden" data-notebook-empty>No articles match this technical depth yet.</p>
     </div>
   </section>
+  <script>
+    import { initNotebookFilters } from "../../../lib/notebook-filter";
+    initNotebookFilters();
+  </script>
 </BaseLayout>

@@ -1,5 +1,5 @@
 ---
-import { normalizeSlug } from "@lib/content";
+import { formatLabel, normalizeSlug } from "@lib/content";
 
 interface Props {
   tags: string[];
@@ -14,7 +14,7 @@ const { tags, base = "/notebook/tags" } = Astro.props;
     tags.map((tag) => (
       <li>
         <a class="tag-link" href={`${base}/${normalizeSlug(tag)}`}>
-          #{tag}
+          #{formatLabel(tag)}
         </a>
       </li>
     ))

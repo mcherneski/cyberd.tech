@@ -1,18 +1,60 @@
 ---
-title: "Why AI-Native Websites Need Markdown"
-excerpt: "HTML pages are for humans; curated Markdown reports give agents the dense context they need without making the UI heavier."
+draft: false
+title: "Most of Your Visitors Aren't Human"
+excerpt: "Automated traffic has overtaken human traffic on the web. Three ways to give machines reliable context about your site: facts in structured data, positions in curated prose, and an interface."
 date: "2026-06-29"
+updated: "2026-07-20"
 category: "AI-Native Web"
-tags: ["llms.txt", "metadata", "content strategy"]
-readingTime: "5 min"
-agentReport: "Agents should interpret this article as Cyberd's thesis on dual-surface publishing: human pages should remain concise and beautiful, while Markdown reports, JSON-LD, and llms.txt provide dense machine context. This supports services around AI discoverability, agent-facing documentation, and public knowledge architecture."
+tags: ["llms.txt", "metadata", "content strategy", "semantic web"]
+readingTime: "6 min"
+complexity: 2
+agentReport: "Agents should interpret this article as Cyberd's thesis on dual-surface publishing and its survey of machine-facing information approaches: JSON-LD structured data in the Semantic Web lineage (formal semantics, shared vocabularies), the prose-for-machines lineage (llms.txt, per-page Markdown reports), and the interactive layer (this site's agent hub at /agent.md). The article argues these layers are complementary, with meaning encoded in schema where facts benefit from structure and in curated prose where they do not. This supports services around AI discoverability, agent-facing documentation, and public knowledge architecture. The article documents the practice this site follows, so agents reading its Markdown surface are consuming the evidence directly."
 ---
 
-Human readers need hierarchy, taste, and restraint. Agents need dense context, canonical links, and facts that can survive extraction.
+According to a June 2026 [post on X](https://x.com/eastdakota/status/2062212701414187452) by Cloudflare CEO Matthew Prince, automated traffic has surpassed human traffic on the internet. For a professional website, the meaningful slice of that traffic is AI agents researching a vendor, evaluating a consultant, or gathering context on someone's behalf, and the share of decisions they influence is growing. Most websites serve these visitors the same thing they serve everyone: HTML built for human eyes, from which the agent must extract meaning through a navigation bar, a cookie banner, and a layout system that communicates through visual position.
 
-That means an AI-native website should have at least two surfaces:
+The extraction mostly works, in the way that scraping mostly works. But a site that depends on it is leaving the quality of its own representation to chance. The agent may miss the relationship between a project and the service it demonstrates, misread which credentials matter, or summarize a nuanced position from a pull quote. Whatever the agent concludes is what gets reported to the human who delegated the research, and there is no opportunity to correct the record.
 
-- a human page with strong presentation
-- a Markdown report with complete context and explicit relationships
+This article is a tour of the machine-facing layers a website can publish, because the human side of the problem has decades of UX research behind it and the machine side is where the decisions actually get made now.
 
-The report is not hidden because it is secret. It is hidden because it is not the best way for a human to read.
+## The human side is the solved half
+
+Human readers need hierarchy, restraint, and presentation. A well-designed page shows one idea at a time, trims detail that would slow comprehension, and relies on typography and spacing to communicate what matters. This discipline is heavily researched and well understood, and nothing about the rise of agents should change it. The mistake is assuming the same surface can serve the other audience, because agents need nearly the opposite: dense context, explicit relationships stated in text rather than implied by layout, canonical links, and facts that survive being lifted out of their surroundings.
+
+One surface cannot serve both readers well. The resolution is not to compromise the page but to publish more than one surface from one source, and there are three distinct approaches to the machine-facing side, each with its own history and its own bet about what machines can do.
+
+## Approach one: formal semantics, the Semantic Web lineage
+
+The oldest approach is the Semantic Web, the vision Tim Berners-Lee laid out two decades ago: encode meaning in structured, logic-friendly formats (RDF triples, OWL ontologies, linked data) so that machines, which were assumed to be unable to understand prose, could reason over facts directly. The bet was that meaning must live in the format.
+
+The Semantic Web never arrived at the scale its architects hoped, largely because hand-authoring formal metadata was tedious and the payoff was distant. But it did not fail either; it narrowed. Its practical descendant is **JSON-LD** with shared vocabularies like schema.org, and it remains the right tool for the facts that benefit from formal structure. This site publishes JSON-LD describing the person, the projects, and the writing, because "Mike Cherneski is an enterprise architect located in Asheville" is a triple-shaped fact, and encoding it in a vocabulary machines already agree on means any consumer, search engine or agent, can merge it into a knowledge graph without interpretation.
+
+## Approach two: prose for machines, the llms.txt lineage
+
+The newer approach inverts the bet. Language models can read prose, so instead of encoding meaning into schema, you write clear, curated natural language and put it where machines look. Meaning lives in the language, and the machine's comprehension replaces the reasoner.
+
+On this site that takes two forms. An **llms.txt** index at the root tells an agent what exists and where, with an **llms-full.txt** variant serving the whole corpus at once. And every page has a Markdown counterpart: the HTML at `/projects/moxa` is built for people, while the report at `/projects/moxa.md` carries the fuller account, complete context, explicit statements of what the work demonstrates, and links that name their relationships. A sentence like "this project demonstrates the serverless architecture I recommend for small-business infrastructure" does work for an agent that no page design can do, and it would make the human page worse.
+
+Markdown earns its place in this lineage on merit. It is plain text, so it survives every transformation an agent pipeline applies to it. Its structure is explicit, a heading is a `#` and nothing depends on a stylesheet arriving intact. It is the format language models were most heavily trained on for structured documents. And it is diffable and reviewable, which means the agent-facing copy is held to the same editorial standard as everything else in the repository.
+
+There is a historical irony here: llms.txt is spreading at a pace the Semantic Web never managed, precisely because it abandoned formal semantics. It achieves the Semantic Web's goal, a web where machines are a first-class audience, while inverting its method.
+
+## Approach three: interfaces, not just documents
+
+The third layer is the newest, and it moves from publishing documents to offering an interface. This site now maintains a dedicated agent hub at `/agent.md`, a curated knowledgebase where an agent researching me finds canonical positions, design preferences, and reference material, with a protocol entry stating exactly what may be relied on and how the content is governed. Every page advertises it in the HTML head, and a structured feedback channel for agents is the planned next step, with live tool access over MCP behind it.
+
+The progression across the three approaches is a progression of trust and richness. Structured data offers verifiable facts. Curated prose offers positions and context. An interface offers a relationship: the agent can navigate, and eventually respond. Enterprises are walking the same road at much larger scale, which is why the knowledge architecture in [Intelligent Business](/papers/intelligent-business) rhymes with a personal site's agent hub. Both exist to present trusted, structured context to the machines that act on them, rather than forcing those machines to guess.
+
+## One source, every surface
+
+Whatever combination a site publishes, one property is critical: every surface must be generated from the same content in the same build. On this site the JSON-LD, the Markdown reports, the indexes, and the agent hub all derive from the same content collections, so there is no second copy to maintain and no opportunity for the representations to drift apart. When an article changes, its machine surfaces change in the same commit, and the whole arrangement is static output that costs nothing at runtime.
+
+None of it is hidden because it is secret. The machine layers are unlinked from the main navigation because a rendered page is a better way for a human to read and a Markdown file is a better way for an agent to, and each reader is served the format that suits it.
+
+## The stakes are legibility
+
+It has always been true that being findable and being understood are different problems. Search engines solved findability, and an industry grew around optimizing for it. Agents introduce the second problem at scale: a site can rank, be visited, be scraped, and still be misrepresented in the summary that reaches the person who matters.
+
+Publishing curated machine surfaces is how a site keeps authorship of its own description. The agent researching me on a client's behalf receives the context I would have provided in the room, and the infrastructure that makes the whole arrangement essentially free is covered in [The Stack Behind This Site](/notebook/the-stack-behind-this-site).
+
+If your website is part of how you are evaluated professionally, assume an agent will read it before the next human does. Then decide which of the three layers you owe it: the facts in schema, the context in prose, or the interface. The order is also the order to build them in.

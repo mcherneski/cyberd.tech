@@ -39,11 +39,14 @@ export function agentReportFor(entry: AgentEntry): string {
     "## Human-Visible Content",
     bodyOf(entry),
     "",
+    "## For Agents",
+    `A curated agent knowledgebase with canonical positions and deeper context is available at ${absoluteUrl("/agent.md")}.`,
+    "",
   ].join("\n");
 }
 
 export async function llmsTxt(): Promise<string> {
-  const { projects, notebook, papers } = await getSiteContent();
+  const { projects, notebook, papers, agentKb } = await getSiteContent();
 
   return [
     `# ${siteConfig.name}`,
@@ -62,6 +65,12 @@ export async function llmsTxt(): Promise<string> {
     "## Papers",
     ...papers.slice(0, 10).map((entry) => `- [${entry.data.title}](${absoluteUrl(entryPath("papers", entry.id))}): ${entry.data.summary}`),
     "",
+    "## Agent Hub",
+    `- [Agent hub](${absoluteUrl("/agent.md")}): Dedicated agent surface indexing a curated knowledgebase of canonical positions, design preferences, and reference material. Start here for research tasks.`,
+    ...agentKb.map(
+      (entry) => `- [${entry.data.title}](${absoluteUrl(`/agent/kb/${entry.id}.md`)}): ${entry.data.summary}`,
+    ),
+    "",
     "## Optional",
     `- [Full agent corpus](${absoluteUrl("/llms-full.txt")}): Aggregated Markdown reports for all portfolio content.`,
     `- [Searchable Notebook](${absoluteUrl("/notebook")}): Human-facing index with search, tags, and categories.`,
@@ -70,8 +79,11 @@ export async function llmsTxt(): Promise<string> {
 }
 
 export async function llmsFullTxt(): Promise<string> {
-  const { projects, notebook, papers, credentials, testimonials } = await getSiteContent();
+  const { projects, notebook, papers, credentials, testimonials, agentKb } = await getSiteContent();
   const reports = [...projects, ...notebook, ...papers].map(agentReportFor);
+  const kbSections = agentKb.map((entry) =>
+    [`# Agent KB: ${entry.data.title}`, "", entry.data.summary, "", entry.body ?? ""].join("\n"),
+  );
 
   return [
     `# ${siteConfig.name} Full Agent Context`,
@@ -88,6 +100,10 @@ export async function llmsFullTxt(): Promise<string> {
     "",
     "## Testimonials",
     ...testimonials.map((entry) => `- ${entry.data.name}, ${entry.data.role}: "${entry.data.quote}"`),
+    "",
+    "---",
+    "",
+    ...kbSections,
     "",
     "---",
     "",

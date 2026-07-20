@@ -42,10 +42,12 @@ const isHome = canonical === "/" || canonical === "/index.html";
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@300;400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Space+Grotesk:wght@300;400;500;600&display=swap"
       rel="stylesheet"
     />
     {agentHref && <link rel="alternate" type="text/markdown" href={absoluteUrl(agentHref)} />}
+    <link rel="help" type="text/markdown" href={absoluteUrl("/agent.md")} title="Agent hub: curated knowledgebase for AI agents" />
+    <meta name="ai-agent-hub" content={absoluteUrl("/agent.md")} />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -104,7 +106,7 @@ const isHome = canonical === "/" || canonical === "/index.html";
     <footer class="container py-10">
       <div class="surface-muted grid gap-4 p-5 md:grid-cols-[1fr_auto] md:items-center">
         <div>
-          <p class="eyebrow">AI-native portfolio</p>
+          <p class="eyebrow">AI-Native portfolio</p>
           <p class="text-muted mt-2 max-w-2xl text-sm">
             Humans get the site. Agents get structured metadata, Markdown alternates, and curated context.
           </p>

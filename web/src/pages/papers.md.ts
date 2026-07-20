@@ -14,7 +14,7 @@ export const GET: APIRoute = async () => {
       ...papers.map((entry) => [
         `## ${entry.data.title}`,
         `- Page: ${absoluteUrl(`/papers/${entry.id}`)}`,
-        `- PDF: ${absoluteUrl(entry.data.pdf)}`,
+        ...(entry.data.pdf ? [`- PDF: ${absoluteUrl(entry.data.pdf)}`] : []),
         `- Agent report: ${absoluteUrl(`/papers/${entry.id}.md`)}`,
         `- Category: ${entry.data.category}`,
         `- Tags: ${entry.data.tags.join(", ")}`,

@@ -28,6 +28,7 @@
   --ease: cubic-bezier(0.33, 0, 0.2, 1);
   --dur: 300ms;
   --font-display: "Space Grotesk", Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-reading: "Source Serif 4", Georgia, "Times New Roman", serif;
   --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
 }
 
@@ -392,6 +393,179 @@ button.surface:focus-visible {
   box-shadow: var(--shadow-hard);
 }
 
+.complexity-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.complexity-toggle {
+  display: inline-flex;
+  flex: 1 1 calc(50% - 0.25rem);
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 0;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--color-ink);
+  background: transparent;
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--shadow-hard);
+  transition:
+    background var(--dur) var(--ease),
+    color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+}
+
+.complexity-toggle:hover,
+.complexity-toggle:focus-visible {
+  border-color: var(--color-yellow);
+  color: var(--color-yellow);
+}
+
+.complexity-toggle.is-active {
+  background: var(--color-yellow);
+  border-color: var(--color-yellow);
+  color: #0a0a0a;
+}
+
+.complexity-toggle.is-active:hover,
+.complexity-toggle.is-active:focus-visible {
+  color: #0a0a0a;
+}
+
+.complexity-legend-item {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0.45rem 0.55rem;
+  border: 2px solid transparent;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  text-align: left;
+  cursor: pointer;
+  opacity: 0.45;
+  transition:
+    opacity var(--dur) var(--ease),
+    background var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+}
+
+.complexity-legend-item:hover,
+.complexity-legend-item:focus-visible {
+  opacity: 0.75;
+}
+
+.complexity-legend-item.is-active {
+  opacity: 1;
+  border-color: var(--color-yellow);
+  background: color-mix(in srgb, var(--color-yellow) 16%, var(--color-paper));
+}
+
+.complexity-legend-item.is-active .complexity-legend-item__label {
+  color: var(--color-yellow);
+}
+
+@media (min-width: 640px) {
+  .complexity-toggle {
+    flex: 1 1 calc(33.333% - 0.34rem);
+  }
+}
+
+@media (min-width: 768px) {
+  .complexity-toggle {
+    flex: 1 1 auto;
+  }
+}
+
+.notebook-search-panel__filters {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--color-ink);
+}
+
+.notebook-controls__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.notebook-controls__hint {
+  max-width: 28rem;
+  line-height: 1.5;
+}
+
+.notebook-sort-menu {
+  position: relative;
+}
+
+.notebook-sort-menu__trigger {
+  position: relative;
+}
+
+.notebook-sort-menu__trigger[aria-expanded="true"] {
+  border-image: var(--gradient-hover) 1;
+  color: var(--color-hover);
+  box-shadow: var(--shadow-accent), var(--glow-soft);
+}
+
+.notebook-sort-menu__panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 20;
+  min-width: 12.5rem;
+  border: 2px solid var(--color-ink);
+  background: var(--color-paper);
+  box-shadow: var(--shadow-hard);
+}
+
+.notebook-sort-menu__option {
+  display: block;
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 0;
+  border-bottom: 2px solid var(--color-ink);
+  background: transparent;
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+
+.notebook-sort-menu__option:last-child {
+  border-bottom: 0;
+}
+
+.notebook-sort-menu__option:hover,
+.notebook-sort-menu__option:focus-visible {
+  color: var(--color-sky);
+}
+
+.notebook-sort-menu__option.is-active {
+  background: color-mix(in srgb, var(--color-sky) 14%, var(--color-paper));
+  color: var(--color-ink);
+}
+
 .seg-btn {
   display: inline-flex;
   flex: 1 1 0;
@@ -633,6 +807,21 @@ button.surface:focus-visible {
   border-color: var(--color-hover);
 }
 
+.complexity-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.55rem;
+  border: 2px solid var(--color-ink);
+  background: color-mix(in srgb, var(--color-green) 14%, var(--color-paper));
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .experience-timeline {
   position: relative;
 }
@@ -750,8 +939,8 @@ button.surface:focus-visible {
   font-weight: 500;
 }
 
-h1,
-h2,
+h1:not(.notebook-article-title),
+h2:not(.notebook-entry-title),
 h3 {
   font-weight: 600;
 }
@@ -768,8 +957,87 @@ h3 {
   line-height: 1.75;
 }
 
-.prose h2,
-.prose h3 {
+.prose :where(p) {
+  margin-block: 0;
+}
+
+.prose :where(p + p) {
+  margin-block-start: 1lh;
+}
+
+.notebook-prose {
+  max-width: none;
+  width: 100%;
+  font-family: var(--font-reading);
+  font-size: 1.0625rem;
+  line-height: 1.8;
+}
+
+.notebook-article-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.08em;
+  line-height: 0.92;
+}
+
+.notebook-entry-title {
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  line-height: 1.05;
+}
+
+.notebook-prose h2 {
+  margin-top: 3rem;
+  margin-bottom: 1.25rem;
+  width: fit-content;
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-size: clamp(1.625rem, 1.1rem + 1.4vw, 2.125rem);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1.12;
+}
+
+.notebook-prose h2::after {
+  content: "";
+  display: block;
+  width: 50%;
+  min-width: 50%;
+  height: 2px;
+  margin-top: 0.75rem;
+  background: var(--color-ink);
+}
+
+.notebook-prose h2:first-child {
+  margin-top: 0;
+}
+
+.notebook-prose h3 {
+  margin-top: 2.25rem;
+  margin-bottom: 0.75rem;
+  padding-left: 0.85rem;
+  border-left: 3px solid var(--color-yellow);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+}
+
+.notebook-prose strong {
+  font-weight: 600;
+}
+
+.notebook-entry {
+  border-bottom: 2px solid var(--color-ink);
+}
+
+.notebook-entry:last-of-type {
+  border-bottom: none;
+}
+
+.prose:not(.notebook-prose) h2,
+.prose:not(.notebook-prose) h3 {
   line-height: 1.1;
   letter-spacing: -0.04em;
 }

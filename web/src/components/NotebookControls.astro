@@ -1,0 +1,49 @@
+---
+import { NOTEBOOK_SORT_OPTIONS } from "@lib/complexity";
+
+interface Props {
+  sortMenuId?: string;
+  embedded?: boolean;
+}
+
+const { sortMenuId = "notebook-sort-menu", embedded = false } = Astro.props;
+const sortTriggerId = `${sortMenuId}-trigger`;
+const sortPanelId = `${sortMenuId}-panel`;
+---
+
+<div class:list={[{ "notebook-sort-row mb-8 flex items-center justify-end": !embedded }]}>
+  <div class="notebook-sort-menu shrink-0" data-notebook-sort-menu>
+    <button
+      id={sortTriggerId}
+      type="button"
+      class="button button-secondary notebook-sort-menu__trigger min-h-11"
+      data-notebook-sort-trigger
+      aria-haspopup="menu"
+      aria-expanded="false"
+      aria-controls={sortPanelId}
+      aria-label="Filter and sort articles"
+      title="Filter and sort articles"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true">
+        <path d="M3 6h18M7 12h10M10 18h4"></path>
+      </svg>
+      Filter
+    </button>
+    <div id={sortPanelId} class="notebook-sort-menu__panel is-hidden" role="menu" aria-labelledby={sortTriggerId} data-notebook-sort-panel>
+      {
+        NOTEBOOK_SORT_OPTIONS.map((option, index) => (
+          <button
+            type="button"
+            class:list={["notebook-sort-menu__option", { "is-active": index === 0 }]}
+            role="menuitemradio"
+            aria-checked={index === 0 ? "true" : "false"}
+            data-sort-option={option.value}
+          >
+            {option.label}
+          </button>
+        ))
+      }
+    </div>
+    <input type="hidden" data-notebook-sort value="newest" />
+  </div>
+</div>

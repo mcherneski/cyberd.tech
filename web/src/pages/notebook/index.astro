@@ -1,8 +1,11 @@
 ---
+import ComplexityBadge from "@components/ComplexityBadge.astro";
+import ComplexityLegend from "@components/ComplexityLegend.astro";
+import NotebookControls from "@components/NotebookControls.astro";
 import SearchBox from "@components/SearchBox.astro";
 import TagList from "@components/TagList.astro";
 import BaseLayout from "@layouts/BaseLayout.astro";
-import { collectCategories, collectTags, getSiteContent, slugLabel } from "@lib/content";
+import { collectCategories, collectTags, formatLabel, getSiteContent, slugLabel } from "@lib/content";
 import { personJsonLd } from "@lib/jsonld";
 
 const { notebook } = await getSiteContent();
@@ -11,22 +14,38 @@ const categories = collectCategories(notebook);
 ---
 
 <BaseLayout title="Notebook | Cyberd" description="Searchable notes, articles, and essays." jsonLd={personJsonLd()} agentHref="/notebook.md">
-  <section class="container py-14">
+  <section class="container py-14" data-notebook-filter>
     <p class="eyebrow accent-sky">Not blog. Notebook.</p>
     <h1 class="mt-3 text-6xl font-black tracking-[-0.09em]">Notebook.</h1>
     <p class="mt-4 max-w-2xl text-xl leading-8 text-muted">
-      Searchable, indexable writing with tags for topics and categories for editorial structure.
+      Searchable, indexable writing with tags for topics, categories for editorial structure, and a technical depth rating from overview to expert.
     </p>
     <div class="mt-8">
-      <SearchBox />
+      <div class="notebook-search-panel surface p-4 md:p-5">
+        <SearchBox embedded>
+          <NotebookControls embedded slot="actions" />
+        </SearchBox>
+      </div>
     </div>
-    <div class="mt-8 grid gap-6 md:grid-cols-[1fr_280px]">
-      <div class="grid gap-4">
+    <div class="mt-8 grid gap-6 md:grid-cols-[minmax(0,1fr)_280px]">
+      <div class="min-w-0">
+        <div class="grid gap-4" data-notebook-list>
         {
           notebook.map((entry) => (
-            <article class="surface p-5" data-pagefind-body>
-              <p class="eyebrow accent-yellow">{entry.data.category}</p>
-              <h2 class="mt-2 text-3xl font-black tracking-[-0.06em]">
+            <article
+              class="notebook-entry p-5"
+              data-pagefind-body
+              data-complexity={entry.data.complexity}
+              data-date={entry.data.date.valueOf()}
+            >
+              <span data-pagefind-meta={`title:${entry.data.title}`} hidden></span>
+              <span data-pagefind-meta="type:Notebook" hidden></span>
+              <span data-pagefind-meta={`complexity:${entry.data.complexity}`} hidden></span>
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <p class="eyebrow accent-yellow">{formatLabel(entry.data.category)}</p>
+                <ComplexityBadge level={entry.data.complexity} />
+              </div>
+              <h2 class="notebook-entry-title mt-2 text-3xl">
                 <a class="no-underline" href={`/notebook/${entry.id}`}>{entry.data.title}</a>
               </h2>
               <p class="mt-3 text-muted">{entry.data.excerpt}</p>
@@ -36,8 +55,11 @@ const categories = collectCategories(notebook);
             </article>
           ))
         }
+        <p class="text-muted is-hidden" data-notebook-empty>No articles match this technical depth yet.</p>
+        </div>
       </div>
       <aside class="grid content-start gap-4">
+        <ComplexityLegend />
         <div class="surface-muted p-4">
           <p class="eyebrow accent-crimson">Categories</p>
           <div class="mt-3 grid gap-2">
@@ -53,4 +75,8 @@ const categories = collectCategories(notebook);
       </aside>
     </div>
   </section>
+  <script>
+    import { initNotebookFilters } from "../../lib/notebook-filter";
+    initNotebookFilters();
+  </script>
 </BaseLayout>

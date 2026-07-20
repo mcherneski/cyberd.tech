@@ -17,6 +17,7 @@ export const siteConfig = {
   nav: [
     { href: "/notebook", label: "Notebook" },
     { href: "/projects", label: "Projects" },
+    { href: "/papers", label: "Papers" },
     { href: "/about", label: "File" },
   ],
   accents: ["sky", "yellow", "crimson"] as const,

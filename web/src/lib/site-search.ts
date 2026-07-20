@@ -1,3 +1,9 @@
+import { complexityFullLabel, isComplexityLevel } from "@lib/complexity";
+import {
+  compareSearchResults,
+  matchesComplexityFilter,
+  readNotebookView,
+} from "@lib/notebook-filter";
 import { searchIndex, type SearchIndexEntry } from "@lib/search-index";
 
 type SearchResult = SearchIndexEntry & {
@@ -11,7 +17,7 @@ type PagefindModule = {
       data: () => Promise<{
         url: string;
         excerpt: string;
-        meta?: { title?: string; type?: string };
+        meta?: { title?: string; type?: string; complexity?: string };
       }>;
     }>;
   }>;
@@ -41,6 +47,11 @@ function typeFromHref(href: string): SearchResult["type"] {
   return "Notebook";
 }
 
+function parseComplexity(value: string | undefined): number | undefined {
+  if (!value || !isComplexityLevel(value)) return undefined;
+  return Number(value);
+}
+
 async function loadFallbackIndex(): Promise<SearchIndexEntry[]> {
   const response = await fetch("/search-index.json");
   if (!response.ok) throw new Error("Search index unavailable");
@@ -62,20 +73,31 @@ async function loadPagefind(): Promise<PagefindModule | null> {
 
 async function searchWithPagefind(pagefind: PagefindModule, query: string): Promise<SearchResult[]> {
   const response = await pagefind.search(query);
-  const data = await Promise.all(response.results.slice(0, 12).map((result) => result.data()));
+  const data = await Promise.all(response.results.slice(0, 24).map((result) => result.data()));
 
   return data.map((item) => {
     const href = normalizeHref(item.url);
     const type = typeFromMeta(item.meta?.type) ?? typeFromHref(href);
+    const complexity = parseComplexity(item.meta?.complexity);
     return {
       title: item.meta?.title ?? href.split("/").filter(Boolean).at(-1) ?? "Result",
       excerpt: "",
       href,
       type,
       tags: [],
+      complexity,
       snippet: item.excerpt,
     };
   });
+}
+
+function applySearchView(root: HTMLElement, results: SearchResult[]): SearchResult[] {
+  const scope = root.closest<HTMLElement>("[data-notebook-filter]");
+  const { activeFilters, sort } = readNotebookView(scope);
+  const filtered = results.filter((result) =>
+    matchesComplexityFilter(activeFilters, result.complexity, result.type),
+  );
+  return [...filtered].sort((a, b) => compareSearchResults(a, b, sort));
 }
 
 function renderResults(root: HTMLElement, results: SearchResult[]): void {
@@ -85,18 +107,20 @@ function renderResults(root: HTMLElement, results: SearchResult[]): void {
 
   if (!list || !empty || !input) return;
 
-  list.replaceChildren();
-  empty.classList.toggle("is-hidden", results.length > 0);
-  input.setAttribute("aria-expanded", results.length > 0 ? "true" : "false");
+  const visible = applySearchView(root, results);
 
-  if (results.length === 0) {
+  list.replaceChildren();
+  empty.classList.toggle("is-hidden", visible.length > 0);
+  input.setAttribute("aria-expanded", visible.length > 0 ? "true" : "false");
+
+  if (visible.length === 0) {
     list.hidden = true;
     return;
   }
 
   list.hidden = false;
 
-  for (const result of results) {
+  for (const result of visible) {
     const item = document.createElement("li");
     item.className = "site-search__result";
 
@@ -104,9 +128,21 @@ function renderResults(root: HTMLElement, results: SearchResult[]): void {
     link.className = "site-search__result-link surface-muted block p-4 no-underline";
     link.href = result.href;
 
+    const header = document.createElement("div");
+    header.className = "flex flex-wrap items-center justify-between gap-3";
+
     const eyebrow = document.createElement("p");
     eyebrow.className = `eyebrow ${TYPE_ACCENTS[result.type]}`;
     eyebrow.textContent = result.type;
+
+    header.append(eyebrow);
+
+    if (result.type === "Notebook" && result.complexity) {
+      const badge = document.createElement("span");
+      badge.className = "complexity-badge";
+      badge.textContent = complexityFullLabel(result.complexity as 1 | 2 | 3 | 4 | 5);
+      header.append(badge);
+    }
 
     const title = document.createElement("p");
     title.className = "mt-2 text-lg font-black tracking-[-0.05em]";
@@ -116,7 +152,7 @@ function renderResults(root: HTMLElement, results: SearchResult[]): void {
     summary.className = "text-muted mt-2 text-sm leading-6";
     summary.textContent = result.snippet || result.excerpt;
 
-    link.append(eyebrow, title, summary);
+    link.append(header, title, summary);
     item.append(link);
     list.append(item);
   }
@@ -133,6 +169,7 @@ function bindSiteSearch(root: HTMLElement): void {
   let pagefind: PagefindModule | null = null;
   let ready = false;
   let debounce: ReturnType<typeof setTimeout> | undefined;
+  let lastResults: SearchResult[] = [];
 
   const ensureReady = async (): Promise<void> => {
     if (ready) return;
@@ -146,6 +183,7 @@ function bindSiteSearch(root: HTMLElement): void {
   const runSearch = async (query: string): Promise<void> => {
     const trimmed = query.trim();
     if (!trimmed) {
+      lastResults = [];
       renderResults(root, []);
       status.textContent = "";
       return;
@@ -155,21 +193,38 @@ function bindSiteSearch(root: HTMLElement): void {
 
     try {
       await ensureReady();
-      const results =
+      lastResults =
         pagefind != null
           ? await searchWithPagefind(pagefind, trimmed)
           : searchIndex(fallbackIndex ?? [], trimmed).map((entry) => ({ ...entry }));
 
-      renderResults(root, results);
+      renderResults(root, lastResults);
+      const visible = applySearchView(root, lastResults);
       status.textContent =
-        results.length === 0
+        visible.length === 0
           ? `No results for “${trimmed}”.`
-          : `${results.length} result${results.length === 1 ? "" : "s"} for “${trimmed}”.`;
+          : `${visible.length} result${visible.length === 1 ? "" : "s"} for “${trimmed}”.`;
     } catch {
+      lastResults = [];
       renderResults(root, []);
       status.textContent = "Search is unavailable right now.";
     }
   };
+
+  const scope = root.closest("[data-notebook-filter]");
+  scope?.addEventListener("notebook-view-change", () => {
+    if (lastResults.length > 0 || input.value.trim()) {
+      renderResults(root, lastResults);
+      const visible = applySearchView(root, lastResults);
+      const trimmed = input.value.trim();
+      if (trimmed) {
+        status.textContent =
+          visible.length === 0
+            ? `No results for “${trimmed}”.`
+            : `${visible.length} result${visible.length === 1 ? "" : "s"} for “${trimmed}”.`;
+      }
+    }
+  });
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();

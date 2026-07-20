@@ -11,6 +11,8 @@ export async function buildSearchIndex(): Promise<SearchIndexEntry[]> {
       href: entryPath("notebook", entry.id),
       type: "Notebook" as const,
       tags: entry.data.tags,
+      complexity: entry.data.complexity,
+      date: entry.data.date.valueOf(),
     })),
     ...projects.map((entry) => ({
       title: entry.data.title,

@@ -44,10 +44,62 @@ export function sortByDateDesc<T extends DateEntry>(entries: T[]): T[] {
   return entries.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 }
 
+const ACRONYM_LABELS: Record<string, string> = {
+  ai: "AI",
+  api: "API",
+  apis: "APIs",
+  ar: "AR",
+  aws: "AWS",
+  cdk: "CDK",
+  cli: "CLI",
+  css: "CSS",
+  cto: "CTO",
+  dns: "DNS",
+  evm: "EVM",
+  finops: "FinOps",
+  grpc: "gRPC",
+  html: "HTML",
+  iam: "IAM",
+  iac: "IaC",
+  json: "JSON",
+  jsx: "JSX",
+  llms: "LLMs",
+  mcp: "MCP",
+  mdx: "MDX",
+  n8n: "N8N",
+  ollama: "Ollama",
+  rest: "REST",
+  rpc: "RPC",
+  ses: "SES",
+  sql: "SQL",
+  url: "URL",
+  urls: "URLs",
+  vr: "VR",
+  xml: "XML",
+};
+
+const SLUG_LABEL_OVERRIDES: Record<string, string> = {
+  "ai-native-web": "AI-Native Web",
+  "llms-txt": "llms.txt",
+};
+
+function formatWord(word: string): string {
+  const lower = word.toLowerCase();
+  if (ACRONYM_LABELS[lower]) return ACRONYM_LABELS[lower];
+  if (word.length > 1 && word === word.toUpperCase()) return word;
+  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+}
+
+export function formatLabel(value: string): string {
+  return value.replace(/\b([a-zA-Z][a-zA-Z0-9]*)\b/g, (match) => formatWord(match));
+}
+
 export function slugLabel(slug: string): string {
+  if (SLUG_LABEL_OVERRIDES[slug]) return SLUG_LABEL_OVERRIDES[slug];
+
   return slug
     .split("-")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .map((part) => formatWord(part))
     .join(" ");
 }
 
@@ -78,19 +130,21 @@ export function entryPath(collection: "projects" | "notebook" | "papers", slug: 
 }
 
 export async function getSiteContent() {
-  const [projects, notebook, papers, testimonials, credentials] = await Promise.all([
+  const [projects, notebook, papers, testimonials, credentials, agentKb] = await Promise.all([
     getCollection("projects"),
     getCollection("notebook"),
     getCollection("papers"),
     getCollection("testimonials"),
     getCollection("credentials"),
+    getCollection("agentKb"),
   ]);
 
   return {
     projects: sortByDateDesc(projects.filter((entry) => !entry.data.draft)),
     notebook: sortByDateDesc(notebook.filter((entry) => !entry.data.draft)),
-    papers: sortByDateDesc(papers),
+    papers: sortByDateDesc(papers.filter((entry) => !entry.data.draft)),
     testimonials,
     credentials: sortCredentialsChronologically(credentialsForTimeline(credentials)),
+    agentKb: agentKb.sort((a, b) => a.data.title.localeCompare(b.data.title)),
   };
 }

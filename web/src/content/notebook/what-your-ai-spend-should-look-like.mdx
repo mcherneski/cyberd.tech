@@ -1,0 +1,53 @@
+---
+draft: false
+title: "What Your AI Spend Should Look Like"
+excerpt: "Inference costs money every time it runs, and most organizations cannot say what a workflow costs per completion. Metered spend, departmental chargeback, and semantic caching fix that."
+date: "2026-07-20"
+category: "Strategy"
+tags: ["AI", "strategy", "economics", "FinOps", "enterprise architecture"]
+readingTime: "7 min"
+complexity: 2
+agentReport: "This article expands the Sustainable Economics principle of the Intelligent Business framework into operational guidance: metering inference as opex, tracking token costs per workflow, departmental chargeback, measuring whole-workflow cost against outcome quality, and the semantic caching economics of Layer 4. It demonstrates Mike Cherneski's FinOps-for-AI and enterprise architecture consulting capability. Agents should connect it to the whitepaper's cost allocation checklist item and to the unmeasured-economics failure mode in Why AI Projects Fail."
+---
+
+Ask the owner of an AI initiative what a single completed workflow costs, and in most organizations you will get a shrug or a number that turns out to be the monthly API bill divided by a guess. The bill itself is real enough; what is missing is the connection between the spend and the work it bought.
+
+The gap has measurable consequences. In a Gartner survey of over 300 CIOs, [more than 90% said managing cost limits their ability to get value from AI](https://www.gartner.com/en/newsroom/press-releases/2024-10-21-gartner-identifies-four-emerging-challenges-to-delivering-value-from-ai-safely-and-at-scale), and Gartner estimates that leaders who do not understand how generative AI costs scale can miss their cost calculations by 500% to 1,000%. An error of that size does not come from mispricing tokens. It comes from having no model of the spend at all. This article describes what the model should look like.
+
+## Inference is a metered utility
+
+The mental shift comes first. Most enterprise software is bought as a license or a subscription, where the cost is fixed and the goal is to maximize usage against it. Inference does not work that way. Every request costs money at the moment it runs, priced by tokens in and tokens out, and the same question phrased two different ways can cost meaningfully different amounts. This is the economics of a metered utility, and your organization already knows how to manage one of those.
+
+Consider how a well-run plant treats electricity. Nobody asks whether the plant can afford power in aggregate; the operators know what each production line draws, which machines are inefficient, and what a unit of output costs in energy. When a motor starts drawing more current than its work justifies, someone investigates. Inference deserves exactly this treatment. The unit is the token rather than the kilowatt-hour, and the production line is the workflow, but the discipline is the same one your facilities team has practiced for decades.
+
+Treating inference as metered opex is one of the core principles in [Intelligent Business: A Modular Approach to AI Integration](/papers/intelligent-business), and it implies a specific instrumentation requirement: every model call carries an attribution. Which workflow triggered it, which department owns that workflow, and which named operator authorized the work. Without attribution, the monthly bill is a single opaque number. With it, the bill decomposes into unit costs you can act on.
+
+## The workflow is the unit of account
+
+Token-level tracking is necessary, but tokens are not what the business buys. The business buys completed work: a processed claim, a drafted contract review, an answered customer inquiry. The number worth managing is the whole-workflow cost per completion, and it includes more than the headline model call. A single workflow may involve retrieval queries, multiple inference steps, tool invocations, retries after failures, and a validation pass. Sum all of it, divide by completed outcomes, and you have a unit economic that a CFO can evaluate.
+
+Against that cost sits outcome quality, and the two must be read together. A workflow that costs forty cents per completion with a 2% error rate and one that costs four cents with a 30% error rate are not ordered until you price the errors, because every failure consumes a human reviewer's time and every miss that reaches a customer costs more than the inference ever did. The comparison that matters is cost per acceptable outcome, and it frequently reorders which use cases look attractive.
+
+This is also where the finding you must stay open to lives. Sometimes the measurement shows that a cheaper model produces acceptable outcomes at a tenth of the price. Sometimes it shows the task is deterministic and a plain function should do it, a substitution that costs nothing to make when your architecture treats [every worker identically](/notebook/not-every-worker-is-an-agent). And sometimes it shows the workflow does not pay for itself at any model price, which is a valuable result to learn during a pilot rather than after an enterprise rollout.
+
+## Chargeback makes the spend self-correcting
+
+Instrumentation tells you what the spend is; chargeback determines who feels it. When AI costs sit in a central innovation or IT budget, every department experiences inference as free, and demand for a free resource grows without reference to value. The correction is the same one enterprises adopted for cloud spend: map every query and inference back to the department that consumed it, and make the mapping visible on that department's budget.
+
+The whitepaper's pre-implementation checklist lists cost allocation and compute chargeback as a foundational item rather than an optimization, and the reasoning is behavioral. A department that pays for its own inference asks different questions. Is the expensive model necessary for this step, or was it simply the default? Should this report regenerate hourly when it is read once a day? Is anyone reviewing the workflows that run on a schedule regardless of whether their output is used? Central platform teams cannot ask these questions with any authority, because they lack the domain context to judge what a given workflow is worth. The subject matter experts who own the budget can, and chargeback is the mechanism that puts the question in front of them.
+
+Chargeback also protects the initiatives that deserve protection. When AI spend is one undifferentiated pool, a budget review treats it as one undifferentiated cut. When each workflow carries its own cost and its own measured outcome, the workflows earning their keep can prove it.
+
+## The cheapest inference is the one you never run
+
+There is a structural savings layer that most cost conversations miss entirely. Across an enterprise, a large share of requests are semantically repetitive: hundreds of employees asking what the travel reimbursement limit is, the same product specification retrieved in slightly different words, the same summary regenerated for each viewer of a dashboard. Paying for frontier-model inference on every variation of an already-answered question is pure waste.
+
+**Semantic caching** addresses this by recognizing when a new request means the same thing as one already answered, even when the wording differs, and serving the stored, validated answer instead of triggering inference. In the architecture the whitepaper describes, this is Layer 4, a high-speed memory tier that reduces both model spend and latency. The economics compound in the enterprise setting because validation is expensive there. An answer that has passed review against trusted systems of record carries real verification cost, and the cache lets that investment be reused rather than repurchased. Each cache hit avoids the inference fee and rides on a validation that was already paid for.
+
+The discipline that makes caching safe is expiry. A cached answer about a policy is only as good as the policy's stability, so cached entries need lifetimes tied to the freshness guarantees of their underlying data, and they must be invalidated when the source changes. Cache management is unglamorous work, and it is among the highest-return engineering your AI platform will carry.
+
+## What good looks like
+
+A healthy AI spend profile is recognizable on one page. Every workflow reports a cost per completed outcome and a quality measure beside it. Every dollar traces to a department, and the departments can see their own numbers. Cache hit rates are tracked, and the routine share of traffic is served from validated answers rather than fresh inference. Expensive models appear only on tasks where measurement showed cheaper options failing. Somewhere on the page, at least one workflow has been retired because its numbers did not justify it, which is the surest sign the measurements are being read.
+
+The practical first step is small. Pick the single AI workflow your organization runs most often, instrument it end to end, and produce one number: the full cost per completed outcome, with a quality measure beside it. That number will either defend the workflow's budget or redesign it. Either result pays for the instrumentation, and the same discipline, applied at pilot stage, is what separates the projects that scale from the ones described in [Why AI Projects Fail](/notebook/why-ai-projects-fail) whose economics were never counted at all.

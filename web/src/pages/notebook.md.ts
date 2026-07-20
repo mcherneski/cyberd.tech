@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { getSiteContent } from "@lib/content";
+import { complexityFullLabel } from "@lib/complexity";
 import { absoluteUrl } from "@lib/site";
 
 export const GET: APIRoute = async () => {
@@ -16,6 +17,7 @@ export const GET: APIRoute = async () => {
         `- Page: ${absoluteUrl(`/notebook/${entry.id}`)}`,
         `- Agent report: ${absoluteUrl(`/notebook/${entry.id}.md`)}`,
         `- Category: ${entry.data.category}`,
+        `- Technical depth: ${complexityFullLabel(entry.data.complexity)}`,
         `- Tags: ${entry.data.tags.join(", ")}`,
         `- Summary: ${entry.data.excerpt}`,
         "",

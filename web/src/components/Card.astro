@@ -1,4 +1,8 @@
 ---
+import ComplexityBadge from "@components/ComplexityBadge.astro";
+import { formatLabel } from "@lib/content";
+import type { ComplexityLevel } from "@lib/complexity";
+
 interface Props {
   href?: string;
   eyebrow?: string;
@@ -6,9 +10,11 @@ interface Props {
   summary: string;
   accent?: "sky" | "yellow" | "crimson";
   context?: "hobby" | "professional";
+  complexity?: ComplexityLevel;
+  date?: number;
 }
 
-const { href, eyebrow, title, summary, accent = "sky", context } = Astro.props;
+const { href, eyebrow, title, summary, accent = "sky", context, complexity, date } = Astro.props;
 const contextLabel =
   context === "hobby" ? "Hobby" : context === "professional" ? "Professional" : context;
 const accentClass = {
@@ -22,13 +28,18 @@ const Tag = href ? "a" : "article";
 <Tag
   href={href}
   data-context={context}
+  data-complexity={complexity}
+  data-date={date}
   class="surface group block p-5 no-underline transition hover:-translate-x-1 hover:-translate-y-1 hover:border-[var(--color-hover)]"
 >
   {
-    (eyebrow || context) && (
+    (eyebrow || context || complexity) && (
       <div class="flex items-start justify-between gap-3">
-        {eyebrow ? <p class={`eyebrow ${accentClass}`}>{eyebrow}</p> : <span />}
-        {context && <span class={`card-context card-context--${context}`}>{contextLabel}</span>}
+        {eyebrow ? <p class={`eyebrow ${accentClass}`}>{formatLabel(eyebrow)}</p> : <span />}
+        <div class="flex shrink-0 items-center gap-2">
+          {complexity && <ComplexityBadge level={complexity} compact />}
+          {context && <span class={`card-context card-context--${context}`}>{contextLabel}</span>}
+        </div>
       </div>
     )
   }

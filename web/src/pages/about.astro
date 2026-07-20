@@ -10,7 +10,7 @@ const { credentials, testimonials } = await getSiteContent();
 ---
 
 <BaseLayout title="File | Mike Cherneski" description="Enterprise architect and builder. Founder of Cyberd, co-founder and CTO of Moxa. A compressed view of experience across enterprise architecture, cloud, blockchain, and quantum." jsonLd={personJsonLd()} agentHref="/about.md">
-  <section class="container py-14">
+  <section class="container grid gap-6 py-14">
     <div class="surface grid gap-6 p-6 md:grid-cols-[0.7fr_1.3fr] md:items-center md:gap-8 md:p-8">
       <img
         class="portrait w-40 max-w-[40vw] md:w-full md:max-w-none"
@@ -24,17 +24,15 @@ const { credentials, testimonials } = await getSiteContent();
         <p class="eyebrow accent-crimson">File</p>
         <h1 class="mt-3 text-5xl font-black tracking-[-0.09em] md:text-7xl">Mike Cherneski.</h1>
         <p class="text-muted mt-5 max-w-2xl text-xl leading-8">
-          I'm an enterprise architect and builder. I help teams adopt AI and modernize their stack on foundations they can trust: clear data, sensible governance, and infrastructure that holds up. I run Cyberd, my consulting practice, and co-founded Moxa with my wife. When I'm not doing that, I'm tinkering: software, cloud, blockchain, and increasingly hardware.
+          Enterprise architect and builder, designing sustainable systems. 
         </p>
         <p class="text-muted mt-4 max-w-2xl leading-8">
-          The range is the point. I've worked the whole path, from IT support and systems administration to blockchain protocols, a quantum-computing role, and enterprise architecture. I like explaining what I learn along the way.
+          I help organizations modernize on foundations they can trust: data that means something, governance that survives an audit, and infrastructure that runs without a hero. I've lived up and down the stack and now share that knowledge with you.
         </p>
       </div>
     </div>
-  </section>
 
-  <section class="container pb-6">
-    <aside class="surface-muted max-w-md p-5">
+    <aside class="surface-muted w-full p-5">
       <p class="eyebrow accent-sky">Signal</p>
       <ul class="mt-4 grid gap-3 font-bold">
         <li>Founder & principal, Cyberd</li>
