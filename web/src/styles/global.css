@@ -965,6 +965,7 @@ h3 {
   margin-block-start: 1lh;
 }
 
+.article-prose,
 .notebook-prose {
   max-width: none;
   width: 100%;
@@ -986,6 +987,21 @@ h3 {
   line-height: 1.05;
 }
 
+.paper-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding-top: 0.25rem;
+  border-top: 2px solid var(--color-ink);
+}
+
+.paper-actions__citation {
+  max-width: 48rem;
+  line-height: 1.55;
+}
+
+.article-prose h2,
 .notebook-prose h2 {
   margin-top: 3rem;
   margin-bottom: 1.25rem;
@@ -998,6 +1014,7 @@ h3 {
   line-height: 1.12;
 }
 
+.article-prose h2::after,
 .notebook-prose h2::after {
   content: "";
   display: block;
@@ -1008,10 +1025,12 @@ h3 {
   background: var(--color-ink);
 }
 
+.article-prose h2:first-child,
 .notebook-prose h2:first-child {
   margin-top: 0;
 }
 
+.article-prose h3,
 .notebook-prose h3 {
   margin-top: 2.25rem;
   margin-bottom: 0.75rem;
@@ -1024,8 +1043,105 @@ h3 {
   line-height: 1.25;
 }
 
+.article-prose h4,
+.notebook-prose h4 {
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.article-prose strong,
 .notebook-prose strong {
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.article-prose em,
+.notebook-prose em {
+  font-style: italic;
+}
+
+.article-prose ul,
+.article-prose ol,
+.notebook-prose ul,
+.notebook-prose ol {
+  margin: 1.25rem 0;
+  padding-left: 1.4rem;
+}
+
+.article-prose ul,
+.notebook-prose ul {
+  list-style: disc;
+}
+
+.article-prose ol,
+.notebook-prose ol {
+  list-style: decimal;
+}
+
+.article-prose li,
+.notebook-prose li {
+  margin: 0.55rem 0;
+  padding-left: 0.35rem;
+}
+
+.article-prose li > ul,
+.article-prose li > ol,
+.notebook-prose li > ul,
+.notebook-prose li > ol {
+  margin: 0.4rem 0;
+}
+
+.article-prose li > p,
+.notebook-prose li > p {
+  margin: 0;
+}
+
+.article-prose blockquote,
+.notebook-prose blockquote {
+  margin: 1.5rem 0;
+  padding: 0.75rem 0 0.75rem 1rem;
+  border-left: 3px solid var(--color-sky);
+  color: var(--color-muted);
+}
+
+.article-prose table,
+.notebook-prose table {
+  width: 100%;
+  margin: 1.75rem 0;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.article-prose th,
+.article-prose td,
+.notebook-prose th,
+.notebook-prose td {
+  border: 1px solid var(--color-ink);
+  padding: 0.65rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.article-prose th,
+.notebook-prose th {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
   font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--color-mist);
+}
+
+.article-prose hr,
+.notebook-prose hr {
+  margin: 2.5rem 0;
+  border: 0;
+  border-top: 2px solid var(--color-ink);
 }
 
 .notebook-entry {
@@ -1036,8 +1152,8 @@ h3 {
   border-bottom: none;
 }
 
-.prose:not(.notebook-prose) h2,
-.prose:not(.notebook-prose) h3 {
+.prose:not(.article-prose):not(.notebook-prose) h2,
+.prose:not(.article-prose):not(.notebook-prose) h3 {
   line-height: 1.1;
   letter-spacing: -0.04em;
 }
