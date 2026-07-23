@@ -32,6 +32,11 @@ export function agentReportFor(entry: AgentEntry): string {
     `- Category: ${entry.data.category}`,
     `- Tags: ${entry.data.tags.join(", ")}`,
     `- Date: ${entry.data.date.toISOString().slice(0, 10)}`,
+    ...("series" in entry.data && entry.data.series
+      ? [
+          `- Series: ${entry.data.series.name}, part ${entry.data.series.part}${entry.data.series.of ? ` of ${entry.data.series.of}` : ""}`,
+        ]
+      : []),
     "",
     "## Agent Briefing",
     entry.data.agentReport,

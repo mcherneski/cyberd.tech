@@ -4,6 +4,10 @@ title: "Landing Zones"
 excerpt: "Teams need a safe place to experiment with AI before it touches corporate data. A landing zone is that place: an isolated environment with permission, security, and budget controls built in."
 date: "2026-07-20"
 category: "Architecture"
+series:
+  name: "The Architecture, One Piece at a Time"
+  part: 3
+  of: 7
 tags: ["AI", "enterprise architecture", "cloud", "infrastructure", "architecture series"]
 readingTime: "7 min"
 complexity: 4
@@ -18,7 +22,7 @@ This article is the third entry in The Architecture, One Piece at a Time, the se
 
 ## What a landing zone is
 
-A landing zone is an isolated compute environment preconfigured with permission, security, and budgeting logic. Every word in that definition is doing work. Isolated means the environment has hard boundaries, so what happens inside it cannot reach corporate data or production systems unless a deliberate, governed connection is made. Preconfigured means the controls exist before the first workload arrives, rather than being promised as a fast-follow. And the three categories of logic — permissions, security, budget — are the three ways an unsupervised experiment hurts you: it accesses something it should not, it exposes something it should not, or it spends money nobody is watching.
+A landing zone is an isolated compute environment preconfigured with permission, security, and budgeting logic. Every word in that definition is doing work. Isolated means the environment has hard boundaries, so what happens inside it cannot reach sensitive corporate data or production systems unless a deliberate, governed connection is made. Preconfigured means the controls exist before the first workload arrives, rather than being promised as a fast-follow. And the three categories of logic are the three ways an unsupervised experiment hurts you: it accesses something it should not (permissions), it exposes something it should not (security), or it spends money nobody is watching (budget).
 
 The useful comparison is a new branch office. A company that opens one does not hand the team keys to an empty floor and let them sort out locks, alarms, and utility contracts themselves. The space is fitted out to corporate standard before anyone moves in: the badge system is wired to the same access directory as headquarters, the alarm reports to the same monitoring desk, and the utilities are metered to a cost center from the first day. The team that arrives gets to focus entirely on the work, because the building already behaves like part of the company. A landing zone is that fitted-out floor, rendered in infrastructure. Teams inside it experiment freely, and the freedom is real precisely because the walls are.
 
@@ -53,3 +57,13 @@ In the whitepaper's Where to Begin sequence, standing up a landing zone is step 
 The landing zone is also what makes the rest of this series deployable. The zero trust controls from the [previous entry](/notebook/zero-trust-for-ai-agents) need an environment that enforces them; the messaging backbone, the caching tier, and the audit store all need somewhere governed to run. Every layer of the architecture assumes the ground under it is solid, and the landing zone is the ground.
 
 The practical first step fits inside one team and one month. Define the template for a single spoke: what identity provider it inherits, what logs it must ship and where, what its default budget ceiling is, and who approves a connection from inside it to any corporate data source. Then stand up exactly one, move your most active AI experiment into it, and shut off wherever that experiment was running before. The full architecture the environment will eventually host is described in [Intelligent Business: A Modular Approach to AI Integration](/papers/intelligent-business), and it can be adopted one layer at a time, but this piece comes first.
+
+## Additional learning resources
+
+The pattern in this article is provider-neutral, but the major clouds each publish serious, free implementation guidance under the same name, and reading how each one renders the idea is a good way to separate the concept from any vendor's version of it.
+
+- [What is a landing zone? — AWS Prescriptive Guidance](https://docs.aws.amazon.com/prescriptive-guidance/latest/migration-aws-environment/understanding-landing-zones.html). AWS's account-per-boundary approach; the multi-account framework section explains why isolation boundaries are drawn at the account level. [AWS Control Tower](https://aws.amazon.com/controltower/) is the managed implementation, and the closest thing to the stamped-from-a-template spoke described above.
+- [What is an Azure landing zone? — Cloud Adoption Framework](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/). The most fully developed treatment of the hub-and-spoke split: Azure's "platform landing zones" are the hub functions from this article, and its "application landing zones" are the spokes. The eight design areas make a solid checklist even for non-Azure implementations.
+- [Landing zone design in Google Cloud — Architecture Center](https://docs.cloud.google.com/architecture/landing-zones). Organized as a sequence of four decisions: identity, resource hierarchy, network, and security. Useful precisely because it presents the landing zone as decisions rather than products, which is the right frame for the on-premise and hybrid cases too.
+
+All three assume the cloud-native case. For the sovereignty-constrained and hybrid shapes discussed above, the vendor guides still earn their reading time: the decisions they enumerate are the same ones an on-premise hub must answer, just with different tools.

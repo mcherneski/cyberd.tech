@@ -1,7 +1,7 @@
 ---
 import "@styles/global.css";
+import SiteNav from "@components/SiteNav.astro";
 import ThemeInit from "@components/ThemeInit.astro";
-import ThemeToggle from "@components/ThemeToggle.astro";
 import { absoluteUrl, siteConfig } from "@lib/site";
 
 interface Props {
@@ -66,39 +66,7 @@ const isHome = canonical === "/" || canonical === "/index.html";
       Skip to content
     </a>
     <header class="container py-5">
-      <nav class="surface flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between">
-        <a
-          class="wordmark no-underline"
-          href="/"
-          aria-label="Cyberd home"
-          {...(isHome ? { "aria-current": "page" } : {})}
-        >
-          <img
-            class="wordmark__logo"
-            src={siteConfig.logo}
-            alt=""
-            width="44"
-            height="44"
-            decoding="async"
-          />
-          <span class="wordmark__lockup">
-            <span class="wordmark__text">
-              {siteConfig.name}<span class="accent-sky">.</span>
-            </span>
-            <span class="wordmark__sub">{siteConfig.tagline}</span>
-          </span>
-        </a>
-        <div class="flex flex-wrap items-center gap-2">
-          {
-            siteConfig.nav.map((item) => (
-              <a class="nav-link" href={item.href}>
-                {item.label}
-              </a>
-            ))
-          }
-          <ThemeToggle />
-        </div>
-      </nav>
+      <SiteNav isHome={isHome} />
     </header>
     <main id="main">
       <slot />

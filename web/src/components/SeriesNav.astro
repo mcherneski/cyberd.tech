@@ -1,0 +1,66 @@
+---
+import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  entry: CollectionEntry<"notebook">;
+}
+
+const { entry } = Astro.props;
+const series = entry.data.series;
+
+// Include drafts so upcoming parts appear as "coming soon" — they are listed
+// by title only and never linked until published.
+const parts = series
+  ? (await getCollection("notebook", ({ data }) => data.series?.name === series.name))
+      .map((item) => ({
+        id: item.id,
+        title: item.data.title,
+        part: item.data.series?.part ?? 0,
+        draft: item.data.draft,
+        current: item.id === entry.id,
+      }))
+      .sort((a, b) => a.part - b.part)
+  : [];
+
+const total = series?.of ?? parts.length;
+const next = parts.find((item) => item.part === (series?.part ?? 0) + 1);
+---
+
+{
+  series && (
+    <nav class="surface-muted p-5 md:p-6" aria-label={`${series.name} series navigation`}>
+      <p class="eyebrow accent-yellow">Series</p>
+      <p class="mt-2 text-2xl font-black tracking-[-0.05em]">{series.name}</p>
+      <ol class="mt-4 grid gap-2">
+        {parts.map((item) => (
+          <li class="flex items-baseline gap-3">
+            <span class="font-mono text-xs font-black" aria-hidden="true">
+              {String(item.part).padStart(2, "0")}
+            </span>
+            {item.current ? (
+              <span class="font-bold" aria-current="page">
+                {item.title} <span class="font-mono text-xs">(this article)</span>
+              </span>
+            ) : item.draft ? (
+              <span class="text-muted">
+                {item.title} <span class="font-mono text-xs">(coming soon)</span>
+              </span>
+            ) : (
+              <a class="font-bold" href={`/notebook/${item.id}`}>
+                {item.title}
+              </a>
+            )}
+          </li>
+        ))}
+      </ol>
+      {next && !next.draft && (
+        <p class="mt-5">
+          <a class="button button-secondary" href={`/notebook/${next.id}`}>
+            Next: Part {next.part} -&gt;
+          </a>
+        </p>
+      )}
+    </nav>
+  )
+}

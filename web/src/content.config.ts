@@ -41,6 +41,13 @@ const notebookSchema = z.object({
   tags: z.array(z.string()).default([]),
   readingTime: z.string().optional(),
   complexity: complexityLevel,
+  series: z
+    .object({
+      name: z.string(),
+      part: z.number().int().positive(),
+      of: z.number().int().positive().optional(),
+    })
+    .optional(),
   agentReport,
 });
 

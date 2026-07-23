@@ -1,0 +1,123 @@
+---
+import ThemeToggle from "@components/ThemeToggle.astro";
+import { siteConfig } from "@lib/site";
+
+interface Props {
+  isHome?: boolean;
+}
+
+const { isHome = false } = Astro.props;
+---
+
+<nav class="site-nav surface" data-site-nav aria-label="Primary">
+  <div class="site-nav__bar">
+    <a
+      class="wordmark no-underline"
+      href="/"
+      aria-label="Cyberd home"
+      {...(isHome ? { "aria-current": "page" } : {})}
+    >
+      <img
+        class="wordmark__logo"
+        src={siteConfig.logo}
+        alt=""
+        width="44"
+        height="44"
+        decoding="async"
+      />
+      <span class="wordmark__lockup">
+        <span class="wordmark__text">
+          {siteConfig.name}<span class="accent-sky">.</span>
+        </span>
+        <span class="wordmark__sub">{siteConfig.tagline}</span>
+      </span>
+    </a>
+
+    <div class="site-nav__actions">
+      <div class="site-nav__links site-nav__links--desktop">
+        {
+          siteConfig.nav.map((item) => (
+            <a class="nav-link" href={item.href}>
+              {item.label}
+            </a>
+          ))
+        }
+      </div>
+      <ThemeToggle />
+      <button
+        class="site-nav__toggle"
+        type="button"
+        data-site-nav-toggle
+        aria-expanded="false"
+        aria-controls="site-nav-menu"
+        aria-label="Open menu"
+      >
+        <span class="site-nav__toggle-bars" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <div class="site-nav__panel" id="site-nav-menu" data-site-nav-panel hidden>
+    <div class="site-nav__links site-nav__links--mobile">
+      {
+        siteConfig.nav.map((item) => (
+          <a class="nav-link site-nav__mobile-link" href={item.href}>
+            {item.label}
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</nav>
+
+<script>
+  const desktopQuery = window.matchMedia("(min-width: 900px)");
+
+  function setOpen(nav: HTMLElement, open: boolean) {
+    const toggle = nav.querySelector<HTMLButtonElement>("[data-site-nav-toggle]");
+    const panel = nav.querySelector<HTMLElement>("[data-site-nav-panel]");
+    if (!toggle || !panel) return;
+
+    nav.classList.toggle("is-open", open);
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    panel.hidden = !open;
+  }
+
+  function initSiteNav() {
+    const nav = document.querySelector<HTMLElement>("[data-site-nav]");
+    if (!nav) return;
+
+    const toggle = nav.querySelector<HTMLButtonElement>("[data-site-nav-toggle]");
+    if (!toggle || toggle.dataset.bound === "true") return;
+    toggle.dataset.bound = "true";
+
+    toggle.addEventListener("click", () => {
+      setOpen(nav, !nav.classList.contains("is-open"));
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") setOpen(nav, false);
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!nav.classList.contains("is-open")) return;
+      if (event.target instanceof Node && !nav.contains(event.target)) {
+        setOpen(nav, false);
+      }
+    });
+
+    const onViewportChange = () => {
+      if (desktopQuery.matches) setOpen(nav, false);
+    };
+    desktopQuery.addEventListener("change", onViewportChange);
+    onViewportChange();
+  }
+
+  initSiteNav();
+  document.addEventListener("astro:after-swap", initSiteNav);
+</script>
