@@ -15,9 +15,10 @@ export const siteConfig = {
     location: "Asheville, NC",
   },
   nav: [
+    { href: "/services", label: "Services" },
     { href: "/notebook", label: "Notebook" },
-    { href: "/projects", label: "Projects" },
     { href: "/papers", label: "Papers" },
+    { href: "/projects", label: "Projects" },
     { href: "/about", label: "File" },
   ],
   accents: ["sky", "yellow", "crimson"] as const,

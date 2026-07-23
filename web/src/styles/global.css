@@ -3,10 +3,11 @@
 :root,
 [data-theme="light"] {
   --color-ink: #0a0a0a;
-  --color-paper: #fafafa;
-  --color-mist: #f1f1f1;
+  /* Cool paperwhite: neutral with a faint green cast so yellow/green accents read cleaner */
+  --color-paper: #f4f5f2;
+  --color-mist: #e8eae5;
   --color-line: #1f1f1f;
-  --color-muted: #5f5f5f;
+  --color-muted: #5a5c58;
   --color-sky: #38bdf8;
   --color-yellow: #eab308;
   --color-crimson: #dc2626;
@@ -264,23 +265,17 @@ html:not([data-theme="dark"]) .wordmark__logo {
 }
 
 .nav-link {
-  border: 2px solid var(--color-ink);
-  background: var(--color-paper);
+  background: transparent;
   color: var(--color-ink);
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 0.35rem;
   font-weight: 500;
   text-decoration: none;
-  transition:
-    border-color var(--dur) var(--ease),
-    color var(--dur) var(--ease),
-    box-shadow var(--dur) var(--ease);
+  transition: color var(--dur) var(--ease);
 }
 
 .nav-link:hover,
 .nav-link:focus-visible {
-  border-image: var(--gradient-hover) 1;
   color: var(--color-hover);
-  box-shadow: var(--glow-soft);
 }
 
 .tag-link {
