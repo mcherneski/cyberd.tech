@@ -49,19 +49,10 @@ const { projects, notebook, papers, testimonials, credentials } = await getSiteC
     </div>
   </section>
 
-  <section id="projects" class="container py-12" data-project-filter>
-    <div class="mb-6 flex flex-col gap-4">
-      <div>
-        <p class="eyebrow accent-yellow">Selected work</p>
-        <h2 class="text-4xl font-black tracking-[-0.07em]" data-project-filter-heading aria-live="polite">
-          The work comes first.
-        </h2>
-      </div>
-      <div class="seg w-full" role="group" aria-label="Filter projects by type">
-        <button type="button" class="seg-btn is-active" data-filter="all" aria-pressed="true">All</button>
-        <button type="button" class="seg-btn" data-filter="professional" aria-pressed="false">Professional</button>
-        <button type="button" class="seg-btn" data-filter="hobby" aria-pressed="false">Hobby</button>
-      </div>
+  <section id="projects" class="container py-12">
+    <div class="mb-6">
+      <p class="eyebrow accent-yellow">Selected work</p>
+      <h2 class="text-4xl font-black tracking-[-0.07em]">The work comes first.</h2>
     </div>
     <div class="grid-auto">
       {
@@ -72,20 +63,14 @@ const { projects, notebook, papers, testimonials, credentials } = await getSiteC
             title={project.data.title}
             summary={project.data.summary}
             accent={index % 3 === 0 ? "sky" : index % 3 === 1 ? "yellow" : "crimson"}
-            context={project.data.context}
           />
         ))
       }
     </div>
-    <p class="text-muted mt-6 is-hidden" data-empty-state>Nothing here yet. New projects in this category are on the way.</p>
     <div class="mt-8">
       <a class="button button-secondary" href="/projects">Full project archive -></a>
     </div>
   </section>
-  <script>
-    import { initProjectFilters } from "../lib/project-filter";
-    initProjectFilters();
-  </script>
 
   <ExperienceTimeline credentials={credentials} linkHref="/about" />
 

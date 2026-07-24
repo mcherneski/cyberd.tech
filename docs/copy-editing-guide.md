@@ -386,7 +386,6 @@ Draft projects/notebook entries are excluded in [content.ts](../web/src/lib/cont
 These files control layout, filtering, and wiring — not marketing text:
 
 - [web/src/components/Card.astro](../web/src/components/Card.astro) — card chrome only; title/summary come from props
-- [web/src/lib/project-filter.ts](../web/src/lib/project-filter.ts) — filter behavior
 - [web/src/lib/site-search.ts](../web/src/lib/site-search.ts) — search logic
 - [web/src/pages/projects/[slug].astro](../web/src/pages/projects/[slug].astro), [notebook/[slug].astro](../web/src/pages/notebook/[slug].astro), [papers/[slug].astro](../web/src/pages/papers/[slug].astro) — page structure; content from collections
 - [infra/lambda/contact-handler.ts](../infra/lambda/contact-handler.ts) — email subject/body for form submissions (backend, not visible on site)
