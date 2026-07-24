@@ -15,15 +15,22 @@ function yearFromLabel(value: string): number {
 }
 
 export function sortCredentialsChronologically(entries: CredentialEntry[]): CredentialEntry[] {
+  // Lower number = earlier on the "latest first" rail when start years match.
   const timelinePriority: Record<string, number> = {
-    moxa: 0,
-    founder: 1,
+    founder: 0,
+    moxa: 1,
     "blockchain-engineering": 2,
   };
 
   return [...entries].sort((a, b) => {
     const yearDiff = yearFromLabel(b.data.start) - yearFromLabel(a.data.start);
     if (yearDiff !== 0) return yearDiff;
+
+    // Ongoing (no end) before closed roles with the same start year.
+    const endA = a.data.end ? yearFromLabel(a.data.end) : Number.POSITIVE_INFINITY;
+    const endB = b.data.end ? yearFromLabel(b.data.end) : Number.POSITIVE_INFINITY;
+    const endDiff = endB - endA;
+    if (endDiff !== 0) return endDiff;
 
     const priorityA = timelinePriority[a.id] ?? 999;
     const priorityB = timelinePriority[b.id] ?? 999;
