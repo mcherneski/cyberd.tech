@@ -6,7 +6,7 @@ export const siteConfig = {
   photo: "/mike-cherneski.jpg",
   title: "Cyberd | Mike Cherneski, enterprise architect and builder",
   description:
-    "The personal site of Mike Cherneski: enterprise architect and builder. Founder of Cyberd, co-founder and CTO of Moxa. Projects, writing, and a framework for adopting AI on foundations you can trust.",
+    "The personal site of Mike Cherneski: enterprise architect and builder. Founder of Cyberd, formerly co-founder and CTO of Moxa. Projects, writing, and a framework for adopting AI on foundations you can trust.",
   url: import.meta.env.SITE ?? "https://example.com",
   author: {
     name: "Mike Cherneski",

@@ -17,10 +17,7 @@ export function personJsonLd() {
       addressRegion: "NC",
       addressCountry: "US",
     },
-    worksFor: [
-      { "@type": "Organization", name: "Cyberd" },
-      { "@type": "Organization", name: "Moxa" },
-    ],
+    worksFor: [{ "@type": "Organization", name: "Cyberd" }],
     alumniOf: { "@type": "CollegeOrUniversity", name: "Adams State University" },
     sameAs: [
       "https://www.linkedin.com/in/mikecherneski",
